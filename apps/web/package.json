@@ -8,7 +8,8 @@
     "start": "next start",
     "test": "tsx --test tests/*.test.ts tests/*.test.tsx",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "seed": "tsx scripts/seed.ts"
   },
   "dependencies": {
     "@aws-sdk/client-bedrock-runtime": "3.1123.0",
