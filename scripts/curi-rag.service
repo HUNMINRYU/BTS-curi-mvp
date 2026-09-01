@@ -1,0 +1,19 @@
+[Unit]
+Description=CURI EC2-local FAISS retrieval sidecar
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/curi/shared/rag-runtime
+Environment=CURI_RAG_INDEX_PATH=/var/lib/curi/rag/index.faiss
+ExecStart=/home/ubuntu/curi/shared/rag-venv/bin/python /home/ubuntu/curi/shared/rag-runtime/rag_sidecar.py
+Restart=on-failure
+RestartSec=5
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
