@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - feat/curi-mvp
   workflow_dispatch:
 
 concurrency:
