@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Build the EC2-local CURI FAISS index from private S3 syllabus PDFs."""
+"""Manually build a local CURI FAISS index from an S3 syllabus source.
+
+This planned rebuild helper is not called by rag_sidecar.py or curi-rag.service.
+"""
 
 from __future__ import annotations
 

@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
-# Uploads only the prepared staging tree to the private S3 documents/ prefix.
-# It never reads or uploads the source ZIP files directly.
+# Planned manual helper: uploads only the prepared staging tree to an S3
+# documents/ prefix. It never reads or uploads source ZIP files directly and
+# is not invoked by the deployed runtime or curi-rag.service.
 #
 # Usage:
 #   CURI_DOCUMENT_BUCKET=curi-documents scripts/upload-rag-documents.sh
 #   CURI_DOCUMENT_BUCKET=curi-documents scripts/upload-rag-documents.sh --dry-run
 #
-# An EC2-local indexer rebuilds its FAISS index from this S3 prefix after sync.
-# CURI_RAG_STAGING_DIR defaults to /tmp/curi-rag-documents and must contain
-# the documents/ tree created by scripts/prepare-rag-documents.mjs.
+# Syncing alone does not rebuild an index. Run scripts/rag_indexer.py
+# separately after sync. CURI_RAG_STAGING_DIR defaults to
+# /tmp/curi-rag-documents and must contain the documents/ tree created by
+# scripts/prepare-rag-documents.mjs.
 
 set -euo pipefail
 

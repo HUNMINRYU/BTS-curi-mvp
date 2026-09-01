@@ -42,7 +42,7 @@
 
 ## 8번(아키텍처) 슬라이드에 넣을 재료
 
-실제 배포 구성이며 그대로 도식화하면 됩니다.
+현재 배포 구성과 계획된 S3 재색인 절차를 분리해 도식화하면 됩니다.
 
 ```
 [브라우저]
@@ -51,13 +51,16 @@
    nginx :80 → Next.js :3000 (systemd)
    ├─ SQLite 단일 파일 (사용자·시간표·체크리스트·팁·질문로그·포인트)
    └─ FAISS 검색 사이드카 :8788 (systemd) → /var/lib/curi/rag/index.faiss
-                                                      ↑
-[Amazon S3] documents/ 강의계획서 PDF ── RAG 인덱서 ──┘
+                                                   (현재 배포의 사전 생성 인덱스)
                                                       ↓
-[Amazon Bedrock] Claude Sonnet(추천 이유·답변 생성) + Titan Text Embeddings v2(임베딩)
+[Amazon Bedrock] Claude Sonnet(추천 이유·답변 생성) + Titan Text Embeddings v2(질의 임베딩)
+
+[계획됨 · 현재 배포 미연결]
+[Amazon S3] documents/ 강의계획서 PDF ── 수동 RAG 인덱서 ──┘
+                                          (PDF 청크 임베딩 후 로컬 인덱스 재생성)
 ```
 
-말로 붙일 한 줄: "질문이 오면 EC2 안의 검색이 먼저 근거를 찾고, 근거가 있을 때만 Bedrock을 부릅니다."
+말로 붙일 한 줄: "질문이 오면 EC2 안의 검색이 먼저 로컬 근거를 찾고, 근거가 있을 때만 Bedrock을 부릅니다. S3 재색인은 아직 배포에 연결하지 않은 계획입니다."
 
 리포지토리 `docs/architecture.md`에 같은 내용의 mermaid 다이어그램이 있으니 렌더해서 이미지로 붙여도 됩니다.
 

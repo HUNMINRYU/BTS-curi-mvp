@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 /**
- * Builds the local, Git-external document tree consumed by the EC2 RAG
- * indexer. This command only writes under CURI_RAG_STAGING_DIR (default:
- * /tmp/curi-rag-documents); it never uploads or creates a local index.
+ * Prepares the local, Git-external document tree for the planned manual S3
+ * document-rebuild workflow. This command only writes under
+ * CURI_RAG_STAGING_DIR (default: /tmp/curi-rag-documents); it never uploads,
+ * creates a local index, or participates in the deployed runtime.
  *
  * Usage:
  *   node scripts/prepare-rag-documents.mjs

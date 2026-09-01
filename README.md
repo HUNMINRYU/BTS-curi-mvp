@@ -1,6 +1,35 @@
-# CURI
+# CURI — 학생을 이해하는 AI 수업 내비게이터
 
-강의계획서 기반 AI 수업 내비게이터 해커톤 MVP.
+> 학생의 전공·관심·목표를 이해해 맞춤 과목을 추천하고, 수업 준비부터 실행까지 안내합니다.
+
+흩어진 강의계획서를 단순 요약하는 대신, 학생 프로필을 기준으로 **추천 이유 → 시간표 → 주차별 준비 → 공식 근거 Q&A → 교수 익명 리포트**까지 연결하는 2026 광주대학교 AI 해커톤 프로젝트입니다.
+
+## 핵심 기능
+
+- 7단계 학생 프로필과 추천 제외 조건
+- 77개 실제 과목 카탈로그 기반 추천 + Bedrock 개인화 이유
+- 주간 시간표, 15주 로드맵, 이번 주 체크리스트
+- 공식 문서 근거가 있을 때만 답하는 Q&A와 인용 표시
+- 포인트·레벨·뱃지·익명 준비왕 랭킹
+- 근거 없음 질문과 구조화 팁을 집계하는 교수 리포트
+
+## 기술 스택과 구조
+
+```text
+apps/web      Next.js 16 · React · TypeScript
+packages/db   SQLite · better-sqlite3
+scripts       데모 시드 · FAISS sidecar · 계획된 S3 수동 재색인
+infra         AWS CDK 스캐폴드(현재 실제 배포는 EC2 release 방식)
+```
+
+현재 서비스는 Amazon EC2에서 nginx → Next.js, SQLite, 로컬 FAISS sidecar로 실행됩니다. Amazon Bedrock Claude는 추천 이유·답변 생성, Titan Text Embeddings v2는 질문 임베딩을 담당합니다. S3 문서 동기화·재색인은 현재 런타임이 아닌 계획된 수동 운영 절차입니다.
+
+## 데이터 윤리
+
+- 공개 카탈로그에는 교수 연락처를 포함하지 않습니다.
+- Q&A 답변과 인용문은 이메일·전화번호를 서버 경계에서 마스킹합니다.
+- 실제 강의계획서와 데모 데이터의 출처를 UI에서 구분합니다.
+- 근거가 없으면 생성 모델을 호출하지 않고 정직하게 `근거 없음`을 반환합니다.
 
 **배포 URL: http://13.209.117.175** · 데모 계정: `student-test`(학생), `professor-test`(교수)
 비밀번호는 저장소에 두지 않습니다. 발표자가 별도로 보관합니다.
@@ -22,18 +51,62 @@
 
 발표 대본은 [`docs/pitch.md`](docs/pitch.md), 상세 시연 대본은 [`docs/demo-script.md`](docs/demo-script.md), 구조도는 [`docs/architecture.md`](docs/architecture.md)에 있습니다.
 
+## 프로젝트 전체 기록과 인수인계
+
+빈 폴더의 환경 설정부터 피벗, 구현, AWS/RAG, 검증, 발표 준비, 남은 위험까지의 전체 기록은 [`docs/full-project-handoff.md`](docs/full-project-handoff.md)에 정리되어 있습니다. 새 에이전트는 이 문서를 먼저 읽고 현재 HEAD에서 검증을 다시 실행하세요.
+
 ## 사용한 AWS 서비스
 
-데모 화면에 실제로 나타나는 서비스만 사용합니다.
+현재 배포의 Q&A 런타임과 계획된 문서 재색인 절차를 구분합니다.
 
-| 서비스 | 용도 |
+| 서비스 | 현재 배포 및 계획 |
 | --- | --- |
-| Amazon EC2 (ap-northeast-2) | Next.js 단일 프로세스와 FAISS 검색 사이드카를 systemd로 실행. 앞단은 nginx |
-| Amazon S3 | 강의계획서 PDF 원본과 sidecar 메타데이터를 비공개 `documents/` 접두사에 보관 |
+| Amazon EC2 (ap-northeast-2) | Next.js 단일 프로세스와 로컬 FAISS 검색 사이드카를 systemd로 실행. 앞단은 nginx |
+| Amazon S3 | **계획됨(현재 배포 미연결):** 준비된 PDF와 sidecar 메타데이터를 `documents/`에 동기화해 수동으로 인덱스를 재생성하는 도구가 저장소에 있다. Q&A 런타임은 S3를 읽지 않는다. |
 | Amazon Bedrock — Claude Sonnet | 추천 이유 생성, 검색 근거 기반 Q&A 답변 생성 |
-| Amazon Bedrock — Titan Text Embeddings v2 | PDF 청크 임베딩(EC2 로컬 FAISS 인덱스 구축) |
+| Amazon Bedrock — Titan Text Embeddings v2 | Q&A 질의 임베딩. 계획된 수동 재색인 시 PDF 청크 임베딩에도 사용 |
 
 사용자·세션·프로필·시간표·체크리스트·팁·Q&A 로그·포인트는 EC2 로컬 SQLite 단일 파일에 저장합니다.
+
+## RAG 문서 색인 현황과 계획된 수동 재구축
+
+현재 배포의 `curi-rag.service`는 `/var/lib/curi/rag/index.faiss`와 `chunks.jsonl`만 읽습니다. 웹 앱은 loopback retriever에 요청하고, sidecar는 로컬 파일과 Bedrock Runtime만 사용합니다. 런타임은 S3를 조회하지 않으며 `CURI_DOCUMENT_BUCKET`도 읽지 않습니다. 저장소만으로는 배포되어 있는 인덱스가 어느 입력 경로에서 만들어졌는지 확인할 수 없습니다.
+
+`CURI_DOCUMENT_BUCKET`은 계획된 수동 재구축에서만 `scripts/upload-rag-documents.sh`와 `scripts/rag_indexer.py`가 읽습니다. `scripts/prepare-rag-documents.mjs`는 로컬 ZIP 경로를 받아 Git 밖 staging에 `documents/` 트리를 만들 뿐, 로컬 인덱스를 만들지 않습니다.
+
+### 로컬 원본 ZIP 준비
+
+아래 명령은 로컬 원본 ZIP을 준비할 때의 정확한 입력 변수입니다. staging 경로는 저장소 밖이어야 합니다.
+
+```bash
+CURI_RAG_STAGING_DIR="/absolute/path/curi-rag-documents" \
+CURI_LIBERAL_ARTS_ZIP="/absolute/path/교양 - 이러닝.zip" \
+CURI_ARCHITECTURE_ZIP="/absolute/path/광주대 건축학과 강의계획서.zip" \
+CURI_COMPUTER_ENGINEERING_ZIP="/absolute/path/광주대 컴퓨터공학과 강의계획서.zip" \
+CURI_ACCOUNTING_TAX_ZIP="/absolute/path/광주대 회계세무학과 강의계획서.zip" \
+node scripts/prepare-rag-documents.mjs
+```
+
+### 계획된 S3 수동 재색인
+
+이 절차는 현재 배포에 연결되어 있지 않습니다. S3 원본 위치와 권한을 AWS 콘솔에서 확인한 뒤에만 사용할 수 있습니다.
+
+```bash
+CURI_DOCUMENT_BUCKET="<bucket>" \
+CURI_RAG_STAGING_DIR="/absolute/path/curi-rag-documents" \
+bash scripts/upload-rag-documents.sh
+
+python3 -m pip install -r scripts/requirements-rag.txt
+
+AWS_DEFAULT_REGION="<region>" \
+CURI_DOCUMENT_BUCKET="<bucket>" \
+CURI_DOCUMENT_PREFIX="documents/" \
+CURI_RAG_INDEX_PATH="/var/lib/curi/rag/index.faiss" \
+CURI_RAG_CHUNKS_PATH="/var/lib/curi/rag/chunks.jsonl" \
+python3 scripts/rag_indexer.py
+```
+
+`CURI_DOCUMENT_BUCKET`은 인덱서의 필수 CURI 변수이고, `CURI_DOCUMENT_PREFIX`, `CURI_RAG_INDEX_PATH`, `CURI_RAG_CHUNKS_PATH`는 위 명령에서 명시한 선택 변수입니다. 인덱서는 로컬 PDF 경로를 받지 않으며 S3 `documents/`에서 PDF와 `{pdf}.metadata.json`을 읽습니다. `AWS_DEFAULT_REGION`과 AWS 자격 증명은 boto3 기본 공급자 체인에서 해석되어야 하며, 정확한 값·권한은 저장소에서 알 수 없습니다.
 
 ## 요구사항
 
@@ -97,3 +170,21 @@ EC2에 릴리스 디렉터리를 올리고 심링크를 바꾸는 방식입니�
 4. 롤백은 심링크를 이전 릴리스로 되돌리고 같은 서비스를 재시작하면 됩니다.
 
 테스트 계정 비밀번호는 서버의 `~/curi/shared/web.env`(퍼미션 600)에 두고 systemd `EnvironmentFile`로 주입합니다. 저장소에는 넣지 않습니다.
+
+### GitHub Actions 자동 배포
+
+`.github/workflows/deploy-ec2.yml`은 `feat/curi-mvp` push 또는 수동 실행 시 다음 순서로 동작합니다.
+
+1. GitHub-hosted runner에서 install → typecheck → test → build
+2. 새 `~/curi/releases/<UTC 타임스탬프>/` 업로드
+3. EC2에서 의존성 설치·프로덕션 build
+4. `current` 심링크 전환·`curi` 서비스 재시작
+5. `127.0.0.1:3000/login` smoke 실패 시 이전 심링크로 자동 롤백
+
+GitHub repository의 `production` environment에 아래 Secrets가 필요합니다.
+
+- `EC2_HOST`: EC2 public host/IP
+- `EC2_USER`: 기본값 `ubuntu`
+- `EC2_SSH_PRIVATE_KEY`: EC2 접속용 private key 전문
+
+private key와 테스트 계정 비밀번호는 GitHub Secrets·EC2 `web.env`에만 두며 저장소에는 커밋하지 않습니다.

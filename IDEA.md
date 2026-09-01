@@ -25,7 +25,7 @@ CURI는 학생의 전공·관심·목표·학습 방식을 이해해 과목과 �
 
 # 제약
 - Next.js App Router 모노리스와 SQLite를 사용한다.
-- AWS는 EC2·S3·Bedrock만 사용하고 Access Key는 만들지 않는다.
-- Bedrock 모델은 `global.anthropic.claude-sonnet-5`; 검색은 결정론적 키워드 방식이며 FAISS·벡터 DB는 금지한다.
+- 현재 배포는 EC2와 Bedrock을 사용한다. S3 문서 동기화·재색인은 계획됨(현재 배포 미연결)이며 Access Key는 만들거나 저장하지 않는다.
+- Bedrock 모델은 `global.anthropic.claude-sonnet-5`; Q&A 검색은 EC2 로컬 FAISS 사이드카를 사용하고 관리형 벡터 DB는 사용하지 않는다.
 - deploy/destroy와 EC2 종료·재시작은 사용자 명시 전 금지한다.
 - 기존 네이비·퍼플 디자인, 학교안심 알림장 폰트, CURI 캐릭터 자산을 유지한다.
