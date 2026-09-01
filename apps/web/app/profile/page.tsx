@@ -2,7 +2,9 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { CuriReward } from "@/components/curi-reward";
+import { AbilityDashboard } from "@/components/ability-dashboard";
 import { OnboardingWizard } from "@/components/onboarding-wizard";
+import { StudentRankingPanel } from "@/components/student-ranking";
 import { getAppDatabase } from "@/lib/app-db";
 import { SESSION_COOKIE_NAME } from "@/lib/auth";
 
@@ -40,6 +42,8 @@ export default async function ProfilePage() {
         }}
         mode="edit"
       />
+      <StudentRankingPanel ranking={database.getStudentRanking(session.user.id)} />
+      <AbilityDashboard />
     </main>
   );
 }
