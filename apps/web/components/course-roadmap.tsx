@@ -1,5 +1,6 @@
 import type { CourseData } from "@/lib/types";
 import { SourceBadge } from "./source-badge";
+import { CuriMascot } from "./curi-mascot";
 
 function statusFor(week: number, currentWeek: number) {
   if (week < currentWeek) return "완료";
@@ -11,9 +12,12 @@ export function CourseRoadmap({ course }: { course: CourseData }) {
   return (
     <section className="section-card" aria-labelledby="roadmap-title">
       <div className="section-heading">
-        <div>
-          <p className="eyebrow">SEMESTER MAP</p>
-          <h2 id="roadmap-title">한 학기 로드맵</h2>
+        <div className="section-title-group">
+          <CuriMascot className="section-mascot" variant="reading" />
+          <div>
+            <p className="eyebrow">SEMESTER MAP</p>
+            <h2 id="roadmap-title">한 학기 로드맵</h2>
+          </div>
         </div>
         <p>{course.currentWeek}주차 진행 중</p>
       </div>
