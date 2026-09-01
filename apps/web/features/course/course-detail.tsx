@@ -2,14 +2,14 @@ import Link from "next/link";
 
 import type { CatalogCourse } from "@/features/catalog/catalog-data";
 import { scheduleLabel } from "@/features/timetable/course-schedule";
-import type { TipAggregate } from "@/lib/tips";
+import { SourceBadge } from "@/components/source-badge";
+import { QaPanel } from "@/features/qa/qa-panel";
+import { TipsPanel } from "@/features/tips/tips-panel";
+import type { TipAggregate } from "@/features/tips/tips";
 import type { CourseData, WeekPlan } from "@/lib/types";
 import { CourseBackButton } from "./course-back-button";
 import { CourseRoadmap } from "./course-roadmap";
 import { CourseSyllabusDialog } from "./course-syllabus-dialog";
-import { QaPanel } from "./qa-panel";
-import { SourceBadge } from "./source-badge";
-import { TipsPanel } from "./tips-panel";
 import { WeeklyCoach } from "./weekly-coach";
 
 type CourseDetailProps = {

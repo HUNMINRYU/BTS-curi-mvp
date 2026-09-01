@@ -1,6 +1,6 @@
 import type { ActiveSession, AppDatabase } from "@curi/db";
 
-import { answerWithBedrock } from "@/lib/bedrock";
+import { answerWithBedrock } from "@/features/qa/bedrock";
 import { getAppDatabase } from "@/lib/app-db";
 import { getActiveSession } from "@/features/auth/auth";
 import { getCatalogCourse } from "@/features/catalog/catalog-data";
@@ -9,9 +9,13 @@ import {
   KNOWLEDGE_BASE_SEARCH_ERROR_MESSAGE,
   type KnowledgeBaseRetrieval,
   type RetrieveCourseCitations,
-} from "@/lib/knowledge-base";
-import { answerCourseQuestion, notFoundQaResult, type GenerateGroundedAnswer } from "@/lib/qa";
-import { redactPersonalContactInfo } from "@/lib/redact";
+} from "@/features/qa/knowledge-base";
+import {
+  answerCourseQuestion,
+  notFoundQaResult,
+  type GenerateGroundedAnswer,
+} from "@/features/qa/qa";
+import { redactPersonalContactInfo } from "@/features/qa/redact";
 
 const QUESTION_ERROR = "질문은 1자 이상 200자 이하로 입력해 주세요.";
 const COURSE_ERROR = "이 과목에서는 Q&A를 제공하지 않습니다.";

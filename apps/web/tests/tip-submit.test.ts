@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { submitTip } from "../lib/tip-submit";
+import { submitTip } from "../features/tips/tip-submit";
 import type { GamificationSummary } from "../lib/gamification";
 
 const aggregate = {

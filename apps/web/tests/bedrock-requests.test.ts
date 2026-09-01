@@ -3,7 +3,7 @@ import test from "node:test";
 
 import { BedrockRuntimeClient } from "@aws-sdk/client-bedrock-runtime";
 
-import { buildAnswerCommand } from "../lib/bedrock";
+import { buildAnswerCommand } from "../features/qa/bedrock";
 import {
   buildRecommendationCommand,
   generateRecommendationReasons,

@@ -1,14 +1,15 @@
 "use client";
 
 import { useRef, useState, type FormEvent, type KeyboardEvent } from "react";
+
+import { CuriMascot } from "@/components/curi-mascot";
+import { SourceBadge } from "@/components/source-badge";
 import type { QaResult } from "@/lib/types";
 import {
   isGamificationSummary,
   publishGamification,
   type GamificationSummary,
 } from "@/lib/gamification";
-import { SourceBadge } from "./source-badge";
-import { CuriMascot } from "./curi-mascot";
 
 function isQaResult(payload: unknown): payload is QaResult {
   if (typeof payload !== "object" || payload === null) return false;

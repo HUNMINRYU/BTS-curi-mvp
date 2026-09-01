@@ -2,7 +2,7 @@ import type { ActiveSession, AppDatabase } from "@curi/db";
 
 import { getAppDatabase } from "@/lib/app-db";
 import { getActiveSession } from "@/features/auth/auth";
-import { getCurrentWeek } from "@/lib/course-data";
+import { getCurrentWeek } from "@/features/course/course-data";
 
 const COURSE_ID = "web-content-development";
 const UNAUTHORIZED_ERROR = "로그인이 필요합니다.";

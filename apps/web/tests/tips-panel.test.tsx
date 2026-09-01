@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { renderToStaticMarkup } from "react-dom/server";
 
-import { TipsPanel } from "../components/tips-panel";
-import type { TipAggregate } from "../lib/tips";
+import { TipsPanel } from "../features/tips/tips-panel";
+import type { TipAggregate } from "../features/tips/tips";
 
 const initialAggregate: TipAggregate = {
   count: 12,

@@ -1,6 +1,6 @@
 import type { CourseData } from "@/lib/types";
-import { SourceBadge } from "./source-badge";
-import { CuriMascot } from "./curi-mascot";
+import { CuriMascot } from "@/components/curi-mascot";
+import { SourceBadge } from "@/components/source-badge";
 
 function statusFor(week: number, currentWeek: number) {
   if (week < currentWeek) return "완료";

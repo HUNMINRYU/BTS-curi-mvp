@@ -6,7 +6,7 @@ import { createAppDatabase } from "@curi/db";
 import { createCredentialTestUser } from "./helpers/auth";
 
 import { createQaHandlers } from "../app/api/qa/route";
-import type { RetrieveCourseCitations } from "../lib/knowledge-base";
+import type { RetrieveCourseCitations } from "../features/qa/knowledge-base";
 import type { Citation } from "../lib/types";
 
 const now = new Date("2026-09-01T00:00:00.000Z");

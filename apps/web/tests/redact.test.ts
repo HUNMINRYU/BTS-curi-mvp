@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { redactPersonalContactInfo } from "../lib/redact";
+import { redactPersonalContactInfo } from "../features/qa/redact";
 
 test("강의계획서 chunk의 이메일 주소를 마스킹한다", () => {
   assert.equal(

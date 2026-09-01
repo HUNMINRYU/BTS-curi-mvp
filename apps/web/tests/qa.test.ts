@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { answerCourseQuestion } from "../lib/qa";
+import { answerCourseQuestion } from "../features/qa/qa";
 import type { Citation } from "../lib/types";
 
 const groundedCitation: Citation = {

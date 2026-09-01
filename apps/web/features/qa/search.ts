@@ -1,4 +1,4 @@
-import type { Citation } from "./types";
+import type { Citation } from "@/lib/types";
 
 const STOP_WORDS: Record<string, true> = {
   "과": true, "그": true, "및": true, "수": true, "은": true, "는": true,

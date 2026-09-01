@@ -1,4 +1,4 @@
-import type { TipAggregate } from "@/lib/tips";
+import type { TipAggregate } from "@/features/tips/tips";
 import type { AnonymousClassInsights } from "@curi/db";
 import { CuriMascot } from "./curi-mascot";
 

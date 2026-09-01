@@ -6,8 +6,8 @@ import {
 
 import { getAppDatabase } from "@/lib/app-db";
 import { getActiveSession } from "@/features/auth/auth";
-import { getTipAggregate, seedDemoTips } from "@/lib/tip-data";
-import { TipValidationError, validateTipInput } from "@/lib/tips";
+import { getTipAggregate, seedDemoTips } from "@/features/tips/tip-data";
+import { TipValidationError, validateTipInput } from "@/features/tips/tips";
 
 const COURSE_ID = "web-content-development";
 const UNAUTHORIZED_ERROR = "로그인이 필요합니다.";

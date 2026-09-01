@@ -1,4 +1,4 @@
-import type { Citation, QaResult } from "./types";
+import type { Citation, QaResult } from "@/lib/types";
 
 export type GenerateGroundedAnswer = (question: string, citations: Citation[]) => Promise<string>;
 

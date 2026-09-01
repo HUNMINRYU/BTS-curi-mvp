@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { createKnowledgeBaseRetriever } from "../lib/knowledge-base";
+import { createKnowledgeBaseRetriever } from "../features/qa/knowledge-base";
 
 test("로컬 검색 어댑터는 courseId와 5개 결과 제한을 전달하고 다른 과목 chunk를 제외한다", async () => {
   let receivedUrl: string | undefined;

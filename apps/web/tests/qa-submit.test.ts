@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { askCourseQuestion } from "../components/qa-panel";
+import { askCourseQuestion } from "../features/qa/qa-panel";
 import type { GamificationSummary } from "../lib/gamification";
 
 const gamification = {

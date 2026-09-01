@@ -7,7 +7,7 @@ import {
   aggregateTips,
   validateTipInput,
   type TipRecord,
-} from "../lib/tips";
+} from "../features/tips/tips";
 
 test("학습 팁은 세 척도, 준비 태그, 동의가 모두 있어야 한다", () => {
   assert.throws(

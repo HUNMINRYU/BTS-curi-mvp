@@ -5,7 +5,7 @@ import { ProfessorReport, type ProfessorQaLog } from "@/components/professor-rep
 import { getAppDatabase } from "@/lib/app-db";
 import { SESSION_COOKIE_NAME } from "@/features/auth/auth";
 import { getCatalogCourse } from "@/features/catalog/catalog-data";
-import { getTipAggregate, seedDemoTips } from "@/lib/tip-data";
+import { getTipAggregate, seedDemoTips } from "@/features/tips/tip-data";
 
 const COURSE_ID = "web-content-development";
 

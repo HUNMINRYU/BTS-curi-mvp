@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from "react";
 
+import { CuriMascot, rewardPresentation, type RewardStage } from "@/components/curi-mascot";
+import { SourceBadge } from "@/components/source-badge";
 import type { WeekPlan } from "@/lib/types";
-import { CuriMascot, rewardPresentation, type RewardStage } from "./curi-mascot";
 import {
   isGamificationSummary,
   publishGamification,
   type GamificationSummary,
 } from "@/lib/gamification";
-import { SourceBadge } from "./source-badge";
 
 
 export type ChecklistState = {

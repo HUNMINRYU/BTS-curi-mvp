@@ -1,6 +1,6 @@
-import courseJson from "../data/course.json";
-import supplementJson from "../data/demo-supplement.json";
-import type { Citation, CourseData, Preparation, WeekPlan } from "./types";
+import courseJson from "@/data/course.json";
+import supplementJson from "@/data/demo-supplement.json";
+import type { Citation, CourseData, Preparation, WeekPlan } from "@/lib/types";
 
 const ACTUAL_DOCUMENT = "웹컨텐츠개발.pdf";
 

@@ -1,10 +1,10 @@
-import type { TipAggregate } from "@/lib/tips";
+import type { TipAggregate } from "@/features/tips/tips";
 
 import {
   isGamificationSummary,
   publishGamification,
   type GamificationSummary,
-} from "./gamification";
+} from "@/lib/gamification";
 
 export type TipSubmitResult = {
   aggregate: TipAggregate | null;

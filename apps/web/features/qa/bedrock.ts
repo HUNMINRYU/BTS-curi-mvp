@@ -1,5 +1,5 @@
 import { BedrockRuntimeClient, ConverseCommand } from "@aws-sdk/client-bedrock-runtime";
-import type { Citation } from "./types";
+import type { Citation } from "@/lib/types";
 
 const MODEL_ID = "global.anthropic.claude-sonnet-5";
 const client = new BedrockRuntimeClient({});

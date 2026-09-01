@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { saveChecklistItem } from "../components/weekly-coach";
+import { saveChecklistItem } from "../features/course/weekly-coach";
 import type { GamificationSummary } from "../lib/gamification";
 
 const gamification = {

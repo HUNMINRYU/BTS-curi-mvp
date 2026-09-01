@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { getCourseData, getCurrentWeek } from "../lib/course-data";
+import { getCourseData, getCurrentWeek } from "../features/course/course-data";
 
 test("로드맵은 실제 강의계획서의 15주 순서와 데모 기준 현재 주차를 보존한다", () => {
   const course = getCourseData();

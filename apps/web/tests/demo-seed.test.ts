@@ -3,7 +3,7 @@ import test from "node:test";
 
 import { createAppDatabase } from "@curi/db";
 
-import { getCurrentWeek } from "../lib/course-data";
+import { getCurrentWeek } from "../features/course/course-data";
 import { seedDemoState } from "../lib/demo-seed";
 import { createCredentialTestUser } from "./helpers/auth";
 

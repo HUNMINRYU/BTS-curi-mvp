@@ -1,7 +1,7 @@
 import type { AppCourseTip, AppDatabase, DemoCourseTipInput } from "@curi/db";
 
 import demoTipsJson from "@/data/demo-tips.json";
-import { aggregateTips, type TipAggregate, type TipRecord } from "@/lib/tips";
+import { aggregateTips, type TipAggregate, type TipRecord } from "@/features/tips/tips";
 
 const DEMO_TIPS: readonly DemoCourseTipInput[] = demoTipsJson.map((tip) => ({
   courseId: tip.courseId,

@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { answerCourseQuestion } from "../lib/qa";
-import { searchCitations } from "../lib/search";
+import { answerCourseQuestion } from "../features/qa/qa";
+import { searchCitations } from "../features/qa/search";
 import type { Citation } from "../lib/types";
 
 const citations: Citation[] = [

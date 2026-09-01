@@ -2,10 +2,10 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { renderToStaticMarkup } from "react-dom/server";
 
-import { CourseDetail } from "../components/course-detail";
-import { CourseSyllabusContents } from "../components/course-syllabus-dialog";
+import { CourseDetail } from "../features/course/course-detail";
+import { CourseSyllabusContents } from "../features/course/course-syllabus-dialog";
 import { getCatalogCourse } from "../features/catalog/catalog-data";
-import { getCourseData, getCurrentWeek } from "../lib/course-data";
+import { getCourseData, getCurrentWeek } from "../features/course/course-data";
 const tipAggregate = {
   count: 12,
   visible: true,

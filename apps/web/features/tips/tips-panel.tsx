@@ -6,8 +6,8 @@ import {
   ALLOWED_TIP_TAGS,
   type TipAggregate,
   type TipScale,
-} from "@/lib/tips";
-import { submitTip } from "@/lib/tip-submit";
+} from "@/features/tips/tips";
+import { submitTip } from "@/features/tips/tip-submit";
 
 type TipsPanelProps = {
   courseId: string;

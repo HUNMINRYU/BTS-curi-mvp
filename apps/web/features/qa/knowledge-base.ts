@@ -1,4 +1,4 @@
-import type { Citation } from "./types";
+import type { Citation } from "@/lib/types";
 
 export const KNOWLEDGE_BASE_SEARCH_ERROR_MESSAGE = "공식 문서를 검색할 수 없습니다. 잠시 후 다시 시도해 주세요.";
 

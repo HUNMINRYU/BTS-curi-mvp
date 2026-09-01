@@ -4,7 +4,7 @@ import test from "node:test";
 import catalogJson from "../data/catalog.json";
 import demoTipsJson from "../data/demo-tips.json";
 import { getCatalog, getCatalogCourse } from "../features/catalog/catalog-data";
-import { ALLOWED_TIP_TAGS } from "../lib/tips";
+import { ALLOWED_TIP_TAGS } from "../features/tips/tips";
 
 test("카탈로그는 77개 실제 강의정보를 학과별 전체 강의계획서 목록에 맞게 제공한다", () => {
   const catalog = getCatalog();

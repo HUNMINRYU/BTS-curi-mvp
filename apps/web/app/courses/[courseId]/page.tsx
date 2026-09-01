@@ -1,12 +1,12 @@
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 
-import { CourseDetail } from "@/components/course-detail";
+import { CourseDetail } from "@/features/course/course-detail";
 import { getAppDatabase } from "@/lib/app-db";
 import { SESSION_COOKIE_NAME } from "@/features/auth/auth";
 import { getCatalogCourse } from "@/features/catalog/catalog-data";
-import { getCourseData, getCurrentWeek } from "@/lib/course-data";
-import { getTipAggregate, seedDemoTips } from "@/lib/tip-data";
+import { getCourseData, getCurrentWeek } from "@/features/course/course-data";
+import { getTipAggregate, seedDemoTips } from "@/features/tips/tip-data";
 
 export const dynamic = "force-dynamic";
 

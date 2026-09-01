@@ -1,7 +1,7 @@
 import type { AppDatabase } from "@curi/db";
 
-import { getCurrentWeek } from "@/lib/course-data";
-import { seedDemoTips } from "@/lib/tip-data";
+import { getCurrentWeek } from "@/features/course/course-data";
+import { seedDemoTips } from "@/features/tips/tip-data";
 
 export type DemoSeedResult = {
   readonly tips: number;

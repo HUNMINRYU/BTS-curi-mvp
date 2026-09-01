@@ -3,7 +3,7 @@ import test from "node:test";
 import { renderToStaticMarkup } from "react-dom/server";
 
 import { ProfessorReport } from "../components/professor-report";
-import type { TipAggregate } from "../lib/tips";
+import type { TipAggregate } from "../features/tips/tips";
 
 const aggregate: TipAggregate = {
   count: 12,
