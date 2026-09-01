@@ -19,6 +19,7 @@ node_modules/
 out/
 coverage/
 cdk.out/
+*.tsbuildinfo
 
 # Local data and logs
 *.db
