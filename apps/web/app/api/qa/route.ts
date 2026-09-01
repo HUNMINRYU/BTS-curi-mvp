@@ -11,6 +11,8 @@ import {
   type RetrieveCourseCitations,
 } from "@/lib/knowledge-base";
 import { answerCourseQuestion, notFoundQaResult, type GenerateGroundedAnswer } from "@/lib/qa";
+import { redactPersonalContactInfo } from "@/lib/redact";
+
 const QUESTION_ERROR = "질문은 1자 이상 200자 이하로 입력해 주세요.";
 const COURSE_ERROR = "이 과목에서는 Q&A를 제공하지 않습니다.";
 const UNAUTHORIZED_ERROR = "로그인이 필요합니다.";
@@ -95,6 +97,11 @@ export function createQaHandlers(database: AppDatabase, options: QaHandlerOption
     }
     return Response.json({
       ...result,
+      answer: redactPersonalContactInfo(result.answer),
+      citations: result.citations.map((citation) => ({
+        ...citation,
+        excerpt: redactPersonalContactInfo(citation.excerpt),
+      })),
       gamification: database.awardQaQuestion(sessionResult.session.user.id, normalizedQuestion, awardedAt),
     });
   }

@@ -183,6 +183,39 @@ test("Q&A API는 검색 오류를 model_error로 처리하거나 근거 없음 �
   }
 });
 
+test("Q&A API는 답변과 citation의 개인 연락처를 마스킹한다", async () => {
+  const database = createAppDatabase(":memory:");
+  createCredentialTestUser(database, { id: "student-fixture", name: "학생", role: "student" });
+  database.createSession({ id: "student-session", userId: "student-fixture", expiresAt: expiry });
+  const citationWithContactInfo: Citation = {
+    ...officialCitation,
+    excerpt: "담당 교수 이메일 professor.name@gwangju.ac.kr, 전화 010-1234-5678",
+  };
+  const { POST } = createQaHandlers(database, {
+    now: () => now,
+    retrieveCitations: retrieveCitations([citationWithContactInfo]),
+    generateAnswer: async () => "professor.name@gwangju.ac.kr 또는 01012345678로 문의하세요.",
+  });
+
+  try {
+    const response = await POST(request({
+      courseId: "web-content-development",
+      question: "담당 교수에게 어떻게 문의하나요?",
+    }));
+    const result = await response.json();
+
+    assert.equal(response.status, 200);
+    assert.equal(result.answer, "[이메일 비공개] 또는 [전화번호 비공개]로 문의하세요.");
+    assert.equal(
+      result.citations[0].excerpt,
+      "담당 교수 이메일 [이메일 비공개], 전화 [전화번호 비공개]",
+    );
+    assert.equal(JSON.stringify(result.citations).includes("professor.name@gwangju.ac.kr"), false);
+  } finally {
+    database.close();
+  }
+});
+
 test("Q&A API는 모델 오류에서도 검색한 공식 근거를 반환하고 로그를 남기지 않는다", async () => {
   const database = createAppDatabase(":memory:");
   createCredentialTestUser(database, { id: "student-fixture", name: "학생", role: "student" });
