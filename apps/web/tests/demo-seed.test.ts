@@ -4,7 +4,7 @@ import test from "node:test";
 import { createAppDatabase } from "@curi/db";
 
 import { getCurrentWeek } from "../features/course/course-data";
-import { seedDemoState } from "../lib/demo-seed";
+import { seedDemoState } from "../features/demo/demo-seed";
 import { createCredentialTestUser } from "./helpers/auth";
 
 const COURSE_ID = "web-content-development";
