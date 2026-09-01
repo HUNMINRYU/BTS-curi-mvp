@@ -2,39 +2,48 @@
 
 ## 1. 시스템 경계
 
-```text
-브라우저
-  └─ Next.js App Router (EC2 단일 프로세스)
-       ├─ 학생: 로그인 → 온보딩 → 추천 → 시간표 → 과목 상세
-       ├─ 교수: 읽기 전용 리포트
-       ├─ Route Handlers: 세션·프로필·추천·시간표·체크리스트·Q&A·팁
-       ├─ SQLite: 사용자·세션·프로필·시간표·체크리스트·팁·Q&A 로그
-       ├─ 정제 JSON: 로컬 폴백 / 배포 시 Amazon S3
-       ├─ Amazon S3 `documents/`: 77개 강의계획서 PDF와 sidecar 메타데이터
-       ├─ EC2 로컬 RAG 인덱스: `/var/lib/curi/rag/index.faiss`와 `chunks.jsonl`
-       └─ Amazon Bedrock
-            ├─ Runtime: 추천 이유와 검색 근거 기반 답변
-            └─ Titan Text Embeddings v2: EC2 인덱서의 PDF 청크 벡터화
+```mermaid
+flowchart LR
+  USER["브라우저<br/>학생 · 교수"] --> NGINX
+
+  subgraph EC2["Amazon EC2 · ap-northeast-2 단일 인스턴스"]
+    NGINX["nginx :80"] --> APP["Next.js App Router :3000<br/>systemd curi.service"]
+    APP --> SQLITE[("SQLite 단일 파일<br/>사용자 · 세션 · 프로필 · 시간표<br/>체크리스트 · 팁 · 질문 로그 · 포인트")]
+    APP -->|"POST /retrieve"| SIDECAR["FAISS 검색 사이드카 :8788<br/>systemd curi-rag.service"]
+    SIDECAR --> INDEX[("/var/lib/curi/rag<br/>index.faiss · chunks.jsonl")]
+    INDEXER["RAG 인덱서<br/>rag_indexer.py"] --> INDEX
+  end
+
+  S3[("Amazon S3<br/>documents/ · 강의계획서 PDF 77건")] --> INDEXER
+  APP -->|"추천 이유 · 근거 기반 답변"| SONNET["Amazon Bedrock<br/>Claude Sonnet"]
+  INDEXER -->|"PDF 청크 임베딩"| TITAN["Amazon Bedrock<br/>Titan Text Embeddings v2"]
 ```
+
+학생 동선은 회원가입·로그인 → 온보딩 → 추천 → 시간표 → 과목 상세 → 질문·팁이고, 교수 동선은 읽기 전용 리포트 하나다. 정제 JSON은 로컬 폴백으로 두고 배포 시 S3를 사용한다.
 
 허용 AWS 서비스는 EC2·S3·Bedrock뿐이다. 회원가입, 관리형 인증·DB, 알림, 외부 강의평, 자유서술 커뮤니티, 별도 관리형 벡터 DB는 경계 밖이다.
 
 ## 2. 라우트와 책임
 
 ```text
-/login                         데모 계정 선택
+/                              로그인 학생 시간표 메인
+/signup                        아이디·비밀번호 회원가입
+/login                         아이디·비밀번호 로그인
 /onboarding                    학생 프로필 7단계 입력
 /recommend                     추천 결과와 시간표 담기
-/                              로그인 학생 시간표 메인
+/profile                       프로필 수정 · 익명 준비왕 랭킹 · 능력 변화 대시보드
 /courses/[courseId]            과목 상세; 대표 과목은 풀 상세
-/professor                     교수 읽기 전용 리포트
-/api/session                   로그인·로그아웃
-/api/profile                   프로필 저장·조회
+/professor                     교수 읽기 전용 리포트(익명 학급 현황·TMI 포함)
+/api/signup                    계정 생성과 즉시 세션 발급
+/api/session                   로그인·세션 조회·로그아웃
+/api/profile                   프로필 저장·조회 + 온보딩 포인트
 /api/recommend                 결정론적 필터 + Bedrock 이유
 /api/courses                   시간표 담기·빼기
-/api/checklist                 사용자별 체크 상태
-/api/qa                        검색·Bedrock·근거 없음 로그
-/api/tips                      팁 제출·집계
+/api/checklist                 사용자별 체크 상태 + 항목·주간 완료 포인트
+/api/qa                        검색·Bedrock·근거 없음 로그 + 질문 포인트
+/api/tips                      팁 제출·집계 + 팁 포인트
+/api/gamification              학생 포인트·레벨·뱃지 요약
+/api/ranking                   익명 준비왕 랭킹(상위 5명 + 내 순위)
 ```
 
 기존 `course-roadmap`, `weekly-coach`, `qa-panel`, `source-badge`, CURI 캐릭터, 디자인 토큰과 폰트는 과목 상세에서 재사용한다.
@@ -72,7 +81,7 @@ type QaResult = { status: "answered" | "not_found" | "model_error"; answer: stri
 ## 4. 데이터 흐름
 
 ### 4.1 세션과 역할
-1. `/login`은 선택한 데모 사용자 ID를 서버에서 검증한다.
+1. `/signup`은 아이디·비밀번호·표시 이름을 허용 규칙으로 검증해 계정을 만들고, `/login`은 아이디로 조회한 자격증명을 scrypt 해시와 상수 시간 비교로 검증한다. 평문 비밀번호는 저장하지 않는다.
 2. 서버는 암호학적으로 안전한 세션 ID를 생성해 `sessions`에 저장하고 HttpOnly·SameSite=Lax 쿠키로 발급한다.
 3. 보호 라우트와 변경 API는 세션과 역할을 매 요청 확인한다.
 4. 로그아웃은 세션 행을 삭제하고 쿠키를 만료한다.
@@ -155,7 +164,29 @@ CREATE TABLE qa_logs (
   question TEXT NOT NULL,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+CREATE TABLE credentials (
+  user_id TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  username TEXT NOT NULL UNIQUE,
+  password_hash TEXT NOT NULL,
+  password_salt TEXT NOT NULL
+);
+CREATE TABLE point_events (
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  event_key TEXT NOT NULL,
+  event_type TEXT NOT NULL,
+  points INTEGER NOT NULL,
+  awarded_at TEXT NOT NULL,
+  PRIMARY KEY (user_id, event_key)
+);
+CREATE TABLE earned_badges (
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  badge_key TEXT NOT NULL,
+  awarded_at TEXT NOT NULL,
+  PRIMARY KEY (user_id, badge_key)
+);
 ```
+
+`point_events`는 append-only이며 `(user_id, event_key)` 기본키와 `INSERT OR IGNORE`로 중복 지급을 DB 레벨에서 막는다. 뱃지는 포인트 이벤트가 새로 삽입된 경우에만 부여한다.
 
 데모 팁은 `user_id NULL`과 고정 `demo_key`를 사용한다. 사용자 팁만 사용자당 1회다. `qa_logs`는 교수 리포트에 학생 식별자를 노출하지 않는다.
 
@@ -174,5 +205,5 @@ CREATE TABLE qa_logs (
 - API: 세션 역할, 프로필, 추천 폴백, 시간표 지속성, Q&A 세 상태·로그, 팁 중복.
 - RAG 준비: 77개 매핑의 고유성, staging 경계, PDF sidecar 메타데이터, `documents/` 동기화 dry run.
 - EC2 RAG: Titan 임베딩 호출에 리전을 고정하지 않는지, 인덱스·청크 sidecar가 같은 버전인지, loopback retriever가 과목 ID가 다른 결과를 거부하는지 확인한다.
-- 브라우저: `docs/demo-script.md` 10단계, 데스크톱·모바일, 키보드·읽어주기.
+- 브라우저: `docs/demo-script.md` 데모 동선, 데스크톱·모바일, 마우스 없이 키보드만으로 통과. 음성 읽어주기(Web Speech)는 이번 범위에서 제외한다.
 - 배포 전: 원본 zip·PDF·PEM·.env가 Git·EC2 배포 산출물에 없는지, 문서 버킷이 비공개인지 검사한다.
