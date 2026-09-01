@@ -85,7 +85,6 @@ jobs:
           previous="$(readlink -f "$root/current" 2>/dev/null || true)"
 
           cd "$RELEASE"
-          corepack enable
           pnpm install --frozen-lockfile
           pnpm run build
 
