@@ -1,0 +1,9 @@
+{
+  "documentName": "7주차 실습 준비 안내 (데모)",
+  "week": 7,
+  "preparations": [
+    { "id": "vscode", "label": "VS Code 설치", "excerpt": "실습 전에 VS Code를 설치하고 실행 여부를 확인하세요." },
+    { "id": "chrome-devtools", "label": "Chrome 개발자도구 확인", "excerpt": "Chrome에서 개발자도구를 열 수 있는지 확인하세요." },
+    { "id": "javascript-runtime", "label": "JavaScript 실행 환경 확인", "excerpt": "브라우저 콘솔에서 간단한 JavaScript 코드를 실행해 보세요." }
+  ]
+}

@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "CURI",
+  title: "CURI | 웹컨텐츠개발 수업 내비게이터",
   description: "강의계획서 기반 AI 수업 내비게이터",
 };
 
