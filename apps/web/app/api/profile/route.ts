@@ -2,7 +2,7 @@ import type { ActiveSession, AppDatabase } from "@curi/db";
 
 import { getAppDatabase } from "@/lib/app-db";
 import { getActiveSession } from "@/features/auth/auth";
-import { validateProfileInput } from "@/lib/profile-options";
+import { validateProfileInput } from "@/features/onboarding/profile-options";
 
 type ProfileHandlerOptions = {
   now?: () => Date;

@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 
 import type { ActiveSession, UserProfile } from "@curi/db";
 import { CuriReward } from "@/components/curi-reward";
-import { OnboardingWizard } from "@/components/onboarding-wizard";
+import { OnboardingWizard } from "@/features/onboarding/onboarding-wizard";
 import { getAppDatabase } from "@/lib/app-db";
 import { SESSION_COOKIE_NAME } from "@/features/auth/auth";
 

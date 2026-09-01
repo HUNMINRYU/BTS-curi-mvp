@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { renderToStaticMarkup } from "react-dom/server";
 
-import { StudentRankingPanel } from "../components/student-ranking";
+import { StudentRankingPanel } from "../features/profile/student-ranking";
 
 test("준비왕 패널은 익명 상위권과 내 순위를 구분해 표시한다", () => {
   const html = renderToStaticMarkup(

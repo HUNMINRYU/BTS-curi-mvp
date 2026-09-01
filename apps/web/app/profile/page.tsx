@@ -2,9 +2,9 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { CuriReward } from "@/components/curi-reward";
-import { AbilityDashboard } from "@/components/ability-dashboard";
-import { OnboardingWizard } from "@/components/onboarding-wizard";
-import { StudentRankingPanel } from "@/components/student-ranking";
+import { OnboardingWizard } from "@/features/onboarding/onboarding-wizard";
+import { AbilityDashboard } from "@/features/profile/ability-dashboard";
+import { StudentRankingPanel } from "@/features/profile/student-ranking";
 import { getAppDatabase } from "@/lib/app-db";
 import { SESSION_COOKIE_NAME } from "@/features/auth/auth";
 

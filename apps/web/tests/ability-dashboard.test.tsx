@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { renderToStaticMarkup } from "react-dom/server";
 
-import { AbilityDashboard } from "../components/ability-dashboard";
+import { AbilityDashboard } from "../features/profile/ability-dashboard";
 
 test("능력 변화 대시보드는 시뮬레이션임을 밝히고 학기 전후를 비교한다", () => {
   const html = renderToStaticMarkup(<AbilityDashboard />);

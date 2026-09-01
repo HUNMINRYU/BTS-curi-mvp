@@ -9,7 +9,11 @@ import {
   getOnboardingRedirect,
 } from "../app/onboarding/page";
 import Home from "../app/page";
-import { OnboardingWizard, onboardingSubmissionError, saveOnboardingProfile } from "../components/onboarding-wizard";
+import {
+  OnboardingWizard,
+  onboardingSubmissionError,
+  saveOnboardingProfile,
+} from "../features/onboarding/onboarding-wizard";
 import { recommendationError } from "../components/recommendations-panel";
 
 const savedProfile = {

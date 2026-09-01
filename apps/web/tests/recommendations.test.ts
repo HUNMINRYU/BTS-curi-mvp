@@ -8,7 +8,7 @@ import { RecommendationsPanel } from "../components/recommendations-panel";
 import type { UserProfile } from "@curi/db";
 
 import { getCatalog, type CatalogCourse } from "../lib/catalog-data";
-import { PROFILE_OPTIONS } from "../lib/profile-options";
+import { PROFILE_OPTIONS } from "../features/onboarding/profile-options";
 import { filterAndRankCourses, recommendCourses } from "../lib/recommendations";
 
 

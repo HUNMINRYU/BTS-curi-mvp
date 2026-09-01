@@ -7,7 +7,7 @@ import {
   ONBOARDING_STEPS,
   PROFILE_OPTIONS,
   type ProfileInput,
-} from "@/lib/profile-options";
+} from "@/features/onboarding/profile-options";
 
 const emptyProfile: ProfileInput = {
   major: null,
