@@ -1,6 +1,7 @@
-import type { TipAggregate } from "@/features/tips/tips";
 import type { AnonymousClassInsights } from "@curi/db";
-import { CuriMascot } from "./curi-mascot";
+
+import { CuriMascot } from "@/components/curi-mascot";
+import type { TipAggregate } from "@/features/tips/tips";
 
 export type ProfessorQaLog = {
   courseId: string;

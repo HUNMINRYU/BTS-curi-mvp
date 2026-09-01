@@ -1,7 +1,10 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-import { ProfessorReport, type ProfessorQaLog } from "@/components/professor-report";
+import {
+  ProfessorReport,
+  type ProfessorQaLog,
+} from "@/features/professor/professor-report";
 import { getAppDatabase } from "@/lib/app-db";
 import { SESSION_COOKIE_NAME } from "@/features/auth/auth";
 import { getCatalogCourse } from "@/features/catalog/catalog-data";

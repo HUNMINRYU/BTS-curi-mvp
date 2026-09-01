@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { renderToStaticMarkup } from "react-dom/server";
 
-import { ProfessorReport } from "../components/professor-report";
+import { ProfessorReport } from "../features/professor/professor-report";
 import type { TipAggregate } from "../features/tips/tips";
 
 const aggregate: TipAggregate = {
