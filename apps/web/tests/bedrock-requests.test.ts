@@ -89,7 +89,7 @@ test("Claude Sonnet 5 추천 요청은 지원 중단된 temperature를 보내지
     }],
   );
 
-  assert.deepEqual(command.input.inferenceConfig, { maxTokens: 800 });
+  assert.deepEqual(command.input.inferenceConfig, { maxTokens: 2000 });
   assert.equal("temperature" in (command.input.inferenceConfig ?? {}), false);
 });
 
@@ -117,7 +117,10 @@ test("형식이 잘못된 JSON 코드 펜스 응답은 계속 거부한다", asy
   );
 });
 
-test("Claude Sonnet 5 추천 요청은 JSON Schema 구조화 출력을 강제한다", () => {
+// 배포 환경의 Bedrock은 이 요청의 outputConfig를 거부한다.
+// ValidationException: "output_config.format: Extra inputs are not permitted"
+// 그 결과 추천 이유가 매번 결정론적 폴백으로 대체됐다.
+test("추천 요청은 모델이 거부하는 outputConfig를 보내지 않는다", () => {
   const command = buildRecommendationCommand(
     {
       major: "컴퓨터공학과",
@@ -139,26 +142,8 @@ test("Claude Sonnet 5 추천 요청은 JSON Schema 구조화 출력을 강제한
     }],
   );
 
-  assert.equal(command.input.outputConfig?.textFormat?.type, "json_schema");
-  const schema = JSON.parse(command.input.outputConfig?.textFormat?.structure?.jsonSchema?.schema ?? "null") as unknown;
-  assert.deepEqual(schema, {
-    type: "object",
-    properties: {
-      recommendations: {
-        minItems: 1,
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            courseId: { type: "string" },
-            reason: { type: "string" },
-          },
-          required: ["courseId", "reason"],
-          additionalProperties: false,
-        },
-      },
-    },
-    required: ["recommendations"],
-    additionalProperties: false,
-  });
+  assert.equal(command.input.outputConfig, undefined);
+  // 한국어 이유 3~5개는 800토큰에서 잘려 JSON이 끊겼다.
+  // SyntaxError: "Unterminated string in JSON at position 549"
+  assert.deepEqual(command.input.inferenceConfig, { maxTokens: 2000 });
 });
