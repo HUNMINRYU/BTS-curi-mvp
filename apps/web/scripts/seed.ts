@@ -1,12 +1,11 @@
 import { join } from "node:path";
 
-import { createAppDatabase } from "@curi/db";
-
+import { getAppDatabase } from "../lib/app-db";
 import { seedDemoState } from "../lib/demo-seed";
 
 const databasePath = process.env.CURI_APP_DB_PATH
   ?? join(process.cwd(), ".data", "curi-app.sqlite");
-const database = createAppDatabase(databasePath);
+const database = getAppDatabase();
 
 try {
   const result = seedDemoState(database);
