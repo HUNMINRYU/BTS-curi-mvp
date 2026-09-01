@@ -1,0 +1,107 @@
+name: Verify and deploy CURI
+
+on:
+  push:
+    branches:
+      - main
+      - feat/curi-mvp
+  workflow_dispatch:
+
+concurrency:
+  group: curi-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.25.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
+
+  deploy:
+    needs: verify
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure SSH
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$EC2_SSH_PRIVATE_KEY" > ~/.ssh/curi.pem
+          chmod 600 ~/.ssh/curi.pem
+          ssh-keyscan -H "$EC2_HOST" >> ~/.ssh/known_hosts
+
+      - name: Upload release
+        id: release
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USER: ${{ secrets.EC2_USER }}
+        run: |
+          release="$(date -u +%Y%m%dT%H%M%SZ)"
+          remote="/home/${EC2_USER}/curi/releases/${release}"
+          echo "remote=$remote" >> "$GITHUB_OUTPUT"
+          ssh -i ~/.ssh/curi.pem "${EC2_USER}@${EC2_HOST}" "mkdir -p '$remote'"
+          rsync -az --delete \
+            --exclude='.git/' \
+            --exclude='.github/' \
+            --exclude='node_modules/' \
+            --exclude='.next/' \
+            --exclude='.data/' \
+            --exclude='.env.local' \
+            --exclude='.omo/' \
+            --exclude='.omp/' \
+            --exclude='.claude/' \
+            --exclude='.gstack/' \
+            -e "ssh -i $HOME/.ssh/curi.pem" \
+            ./ "${EC2_USER}@${EC2_HOST}:${remote}/"
+
+      - name: Build, activate, smoke, and roll back on failure
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USER: ${{ secrets.EC2_USER }}
+          RELEASE: ${{ steps.release.outputs.remote }}
+        run: |
+          ssh -i ~/.ssh/curi.pem "${EC2_USER}@${EC2_HOST}" \
+            "RELEASE='$RELEASE' bash -s" <<'REMOTE'
+          set -euo pipefail
+
+          root="$HOME/curi"
+          previous="$(readlink -f "$root/current" 2>/dev/null || true)"
+
+          cd "$RELEASE"
+          corepack enable
+          pnpm install --frozen-lockfile
+          pnpm run build
+
+          ln -sfn "$RELEASE" "$root/current"
+          if ! sudo systemctl restart curi \
+            || ! curl --fail --silent --show-error --max-time 30 \
+              http://127.0.0.1:3000/login >/dev/null; then
+            if [ -n "$previous" ]; then
+              ln -sfn "$previous" "$root/current"
+              sudo systemctl restart curi
+            fi
+            exit 1
+          fi
+
+          find "$root/releases" -mindepth 1 -maxdepth 1 -type d \
+            -printf '%T@ %p\n' | sort -nr | tail -n +6 | cut -d' ' -f2- \
+            | xargs -r rm -rf
+          REMOTE
