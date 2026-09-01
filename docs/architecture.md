@@ -5,169 +5,174 @@
 ```text
 브라우저
   └─ Next.js App Router (EC2 단일 프로세스)
-       ├─ Server Components: 로드맵·이번 주 코치·팁 집계
-       ├─ Route Handlers: Q&A·팁 제출
-       ├─ SQLite: 팁 응답·중복 제출
-       ├─ 정제 강의정보 저장소
-       │    ├─ 로컬 JSON: 개발·안전한 폴백
-       │    └─ Amazon S3: 배포 원본
-       └─ Amazon Bedrock Runtime: 근거 기반 답변
+       ├─ 학생: 로그인 → 온보딩 → 추천 → 시간표 → 과목 상세
+       ├─ 교수: 읽기 전용 리포트
+       ├─ Route Handlers: 세션·프로필·추천·시간표·체크리스트·Q&A·팁
+       ├─ SQLite: 사용자·세션·프로필·시간표·체크리스트·팁·Q&A 로그
+       ├─ 정제 JSON: 로컬 폴백 / 배포 시 Amazon S3
+       ├─ Amazon S3 `documents/`: 77개 강의계획서 PDF와 sidecar 메타데이터
+       ├─ EC2 로컬 RAG 인덱스: `/var/lib/curi/rag/index.faiss`와 `chunks.jsonl`
+       └─ Amazon Bedrock
+            ├─ Runtime: 추천 이유와 검색 근거 기반 답변
+            └─ Titan Text Embeddings v2: EC2 인덱서의 PDF 청크 벡터화
 ```
 
-사용자 계정, 관리자 화면, 외부 강의평, 외부 벡터 DB는 경계 밖이다.
+허용 AWS 서비스는 EC2·S3·Bedrock뿐이다. 회원가입, 관리형 인증·DB, 알림, 외부 강의평, 자유서술 커뮤니티, 별도 관리형 벡터 DB는 경계 밖이다.
 
-## 2. 소스 구조
+## 2. 라우트와 책임
 
 ```text
-apps/web/
-  app/
-    api/qa/route.ts              질문 검증·검색·Bedrock 답변
-    api/tips/route.ts            팁 입력 검증·중복 차단·집계 반환
-    page.tsx                     데모 단일 페이지 조립
-    layout.tsx                  문서 메타데이터·랜드마크
-  components/
-    course-roadmap.tsx          1~15주 상태와 출처 배지
-    weekly-coach.tsx            7주차 준비·체크리스트·읽어주기
-    source-badge.tsx            actual/demo 표시
-    qa-panel.tsx                질문·답변·근거·상태 알림
-    tips-panel.tsx              집계·구조화 입력·갱신
-  lib/
-    course-data.ts              정제 강의정보 로드
-    search.ts                   결정론적 근거 검색
-    bedrock.ts                  Bedrock 호출 어댑터
-    db.ts                       SQLite 연결·마이그레이션
-    tips.ts                     입력 검증·집계
-    types.ts                    공유 도메인 타입
-  data/
-    course.json                 개인정보 제거 실제 파생 데이터
-    demo-supplement.json        표시된 가상 공지·준비 데이터
-    demo-tips.json              12건 구조화 시드
-  tests/
-    search.test.ts
-    tips.test.ts
-    api-qa.test.ts
-    api-tips.test.ts
-  e2e/demo.spec.ts
-scripts/
-  seed.ts                       SQLite 초기화와 12건 시드
-infra/
-  CDK 앱 껍데기                 4단계에서는 리소스 없음
+/login                         데모 계정 선택
+/onboarding                    학생 프로필 7단계 입력
+/recommend                     추천 결과와 시간표 담기
+/                              로그인 학생 시간표 메인
+/courses/[courseId]            과목 상세; 대표 과목은 풀 상세
+/professor                     교수 읽기 전용 리포트
+/api/session                   로그인·로그아웃
+/api/profile                   프로필 저장·조회
+/api/recommend                 결정론적 필터 + Bedrock 이유
+/api/courses                   시간표 담기·빼기
+/api/checklist                 사용자별 체크 상태
+/api/qa                        검색·Bedrock·근거 없음 로그
+/api/tips                      팁 제출·집계
 ```
+
+기존 `course-roadmap`, `weekly-coach`, `qa-panel`, `source-badge`, CURI 캐릭터, 디자인 토큰과 폰트는 과목 상세에서 재사용한다.
 
 ## 3. 핵심 타입
 
 ```ts
-type SourceKind = "actual" | "demo";
-
-type Citation = {
+type UserRole = "student" | "professor";
+type UserProfile = {
+  userId: string;
+  major: string | null;
+  interest: string | null;
+  goal: string | null;
+  career: string | null;
+  style: string | null;
+  hours: string | null;
+  avoid: string | null;
+};
+type CatalogCourse = {
   id: string;
-  documentName: string;
-  sourceKind: SourceKind;
-  week: number | null;
-  excerpt: string;
+  name: string;
+  department: string;
+  summary: string;
+  goalKeywords: string[];
+  difficulty: "입문" | "중급" | "심화";
+  prerequisites: string[];
+  interestTags: string[];
+  schedule: { day: "월" | "화" | "수" | "목" | "금"; start: number; duration: number } | null;
+  sourceKind: "actual" | "demo";
 };
-
-type WeekPlan = {
-  week: number;
-  topic: string;
-  objectives: string[];
-  assignment: string | null;
-  source: Citation;
-};
-
-type QaResult = {
-  status: "answered" | "not_found" | "model_error";
-  answer: string;
-  citations: Citation[];
-};
-
-type TipInput = {
-  prerequisite: 1 | 2 | 3;
-  practice: 1 | 2 | 3;
-  workload: 1 | 2 | 3;
-  tags: string[];
-  consent: true;
-};
-
-type TipAggregate = {
-  count: number;
-  visible: boolean;
-  averages: null | {
-    prerequisite: number;
-    practice: number;
-    workload: number;
-  };
-  tags: Array<{ tag: string; count: number }>;
-  includesDemo: boolean;
-};
+type Recommendation = { course: CatalogCourse; reason: string | null; score: number };
+type QaResult = { status: "answered" | "not_found" | "model_error"; answer: string; citations: Citation[] };
 ```
 
 ## 4. 데이터 흐름
 
-### 4.1 강의정보
-1. 원본 `웹컨텐츠개발.pdf`에서 허용 필드만 수동 검증해 `course.json`으로 만든다.
-2. 실제 파생 레코드는 `actual`, 보충 레코드는 `demo`를 갖는다.
-3. 로컬은 JSON을 직접 읽는다.
-4. 배포 시 정제 JSON만 S3에 업로드한다. 원본 PDF는 앱 버킷에 업로드하지 않는다.
-5. EC2 앱은 S3 객체를 읽을 수 있으면 사용하고, 실패하면 빌드에 포함된 동일 JSON을 사용한다.
+### 4.1 세션과 역할
+1. `/login`은 선택한 데모 사용자 ID를 서버에서 검증한다.
+2. 서버는 암호학적으로 안전한 세션 ID를 생성해 `sessions`에 저장하고 HttpOnly·SameSite=Lax 쿠키로 발급한다.
+3. 보호 라우트와 변경 API는 세션과 역할을 매 요청 확인한다.
+4. 로그아웃은 세션 행을 삭제하고 쿠키를 만료한다.
 
-### 4.2 Q&A
-1. `/api/qa`가 질문 길이와 형식을 검증한다.
-2. `search.ts`가 정제 청크를 토큰화하고 겹치는 한국어·영문 단어 수로 정렬한다.
-3. 점수가 1 이상인 최대 4개 청크만 근거로 선택한다.
-4. 근거가 없으면 `not_found`를 즉시 반환한다.
-5. 근거가 있으면 출처 ID가 포함된 프롬프트로 Bedrock을 호출한다.
-6. 모델 오류는 `model_error`와 근거 목록을 반환한다.
-7. UI는 답변 상태와 모든 출처 배지를 표시한다.
+### 4.2 온보딩과 추천
+1. 학생이 7단계 단일 선택 값을 제출하면 서버가 허용 목록을 검증해 `user_profile`에 upsert한다.
+2. 추천 필터는 비선호 태그를 제외하고 전공·관심·목표·시간 일치 점수를 계산한다.
+3. 상위 후보 10~15개만 Bedrock에 전달하고 3~5개의 이유를 요청한다.
+4. 모델 실패 시 결정론적 상위 결과를 이유 없이 반환한다.
 
-### 4.3 수강생 팁
-1. 브라우저는 세션 토큰을 생성해 sessionStorage에 보관한다.
-2. `/api/tips`는 토큰을 SHA-256 해시로 변환한다.
-3. 입력을 검증한 뒤 SQLite 트랜잭션에서 삽입한다.
-4. `(course_id, session_hash)` 충돌은 HTTP 409로 반환한다.
-5. 같은 트랜잭션 이후 최신 집계를 계산해 반환한다.
-6. UI는 응답 수와 집계를 재요청 없이 갱신한다.
+### 4.3 시간표와 상세
+1. 담기·빼기는 로그인 사용자와 과목 ID를 `user_courses`에 저장·삭제한다.
+2. 메인은 카탈로그 프리셋으로 주간 그리드를 렌더한다.
+3. 대표 과목은 기존 15주 JSON과 보충 데이터를 사용한다. 다른 과목은 카탈로그 요약만 표시한다.
+4. 체크리스트는 `(user_id, course_id, item_id)`로 저장한다.
+
+### 4.4 Q&A RAG
+1. `/api/qa`는 질문과 선택한 `courseId`를 검증한다.
+2. EC2 로컬 인덱서는 S3 `documents/`의 PDF를 청크화하고, `amazon.titan-embed-text-v2:0`으로 임베딩해 `/var/lib/curi/rag/index.faiss`와 `/var/lib/curi/rag/chunks.jsonl`에 영속화한다. Bedrock 클라이언트의 리전은 지정하지 않고 EC2 역할의 기본 리전을 사용한다.
+3. Q&A 런타임은 `CURI_RAG_RETRIEVER_URL`(기본 `http://127.0.0.1:8788/retrieve`)에 `{ courseId, question, numberOfResults: 5 }`를 POST한다.
+4. retriever는 `metadata.courseId`가 요청 `courseId`와 정확히 같은 결과만 `{ results: [...] }`로 반환한다. 각 결과는 청크 텍스트, S3 URI, `courseId`, `courseName`, `department`, 선택적 숫자 `week`를 포함한다.
+5. 검색 결과가 없으면 Bedrock Runtime을 호출하지 않고 `not_found`를 반환하며 질문을 `qa_logs`에 저장한다.
+6. 검색된 PDF 청크의 인용문·S3 위치를 근거로 보존해 Bedrock Runtime에 전달한다. Runtime 답변에는 검색된 근거만 인용한다.
+7. retriever 또는 모델 오류는 `model_error`와 이미 확보된 근거를 유지한다.
+
+### 4.5 수강생 팁
+1. 세 척도·허용 태그·동의를 검증한다.
+2. 로그인 사용자 ID로 삽입한다.
+3. `(course_id, user_id)` 충돌은 HTTP 409다.
+4. 삽입과 최신 집계 조회는 한 트랜잭션에서 수행한다.
 
 ## 5. SQLite 스키마
 
 ```sql
-CREATE TABLE IF NOT EXISTS course_tips (
+CREATE TABLE users (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  role TEXT NOT NULL CHECK (role IN ('student','professor'))
+);
+CREATE TABLE sessions (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  expires_at TEXT NOT NULL
+);
+CREATE TABLE user_profile (
+  user_id TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  major TEXT, interest TEXT, goal TEXT, career TEXT,
+  style TEXT, hours TEXT, avoid TEXT,
+  completed_at TEXT NOT NULL
+);
+CREATE TABLE user_courses (
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  course_id TEXT NOT NULL,
+  PRIMARY KEY (user_id, course_id)
+);
+CREATE TABLE checklist_state (
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  course_id TEXT NOT NULL,
+  item_id TEXT NOT NULL,
+  completed INTEGER NOT NULL CHECK (completed IN (0,1)),
+  PRIMARY KEY (user_id, course_id, item_id)
+);
+CREATE TABLE course_tips (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   course_id TEXT NOT NULL,
-  session_hash TEXT NOT NULL,
+  user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
+  demo_key TEXT,
   prerequisite INTEGER NOT NULL CHECK (prerequisite BETWEEN 1 AND 3),
   practice INTEGER NOT NULL CHECK (practice BETWEEN 1 AND 3),
   workload INTEGER NOT NULL CHECK (workload BETWEEN 1 AND 3),
   tags_json TEXT NOT NULL,
-  is_demo INTEGER NOT NULL DEFAULT 0 CHECK (is_demo IN (0, 1)),
+  is_demo INTEGER NOT NULL DEFAULT 0 CHECK (is_demo IN (0,1)),
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE(course_id, session_hash)
+  UNIQUE(course_id, user_id),
+  UNIQUE(course_id, demo_key)
+);
+CREATE TABLE qa_logs (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  course_id TEXT NOT NULL,
+  question TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 ```
 
-자유서술·사용자 식별정보·IP는 컬럼으로 만들지 않는다.
+데모 팁은 `user_id NULL`과 고정 `demo_key`를 사용한다. 사용자 팁만 사용자당 1회다. `qa_logs`는 교수 리포트에 학생 식별자를 노출하지 않는다.
 
-## 6. 오류 처리
-- 강의정보 파일 불일치: 앱 시작 실패. 잘못된 출처 표시보다 명시적 실패를 선택한다.
-- 질문 검증 실패: HTTP 400과 필드 오류.
-- 검색 근거 없음: HTTP 200, `status: not_found`; 모델 미호출.
-- Bedrock 실패: HTTP 200, `status: model_error`, 근거 유지.
-- 팁 입력 오류: HTTP 400.
-- 중복 팁: HTTP 409.
-- SQLite 쓰기 실패: HTTP 500, 기존 집계는 변경하지 않는다.
-- Web Speech API 부재: 읽어주기 버튼 비활성화, 텍스트는 그대로 제공한다.
+## 6. 보안·오류 처리
+- 모든 변경 API는 세션·역할·입력 허용 목록을 검증한다.
+- 세션 쿠키는 HttpOnly·SameSite=Lax이며 운영 환경에서 Secure다.
+- 로그인 실패 400, 미인증 401, 역할 위반 403, 중복 409, 저장 실패 500으로 구분한다.
+- 추천 Bedrock 실패는 결정론적 후보를 유지한다. Q&A retriever·모델 실패는 이미 확보된 근거를 유지한 `model_error`다.
+- 원본 PDF·zip·PEM·환경 파일은 Git·EC2 배포 산출물·공개 앱 S3 경로에 넣지 않는다.
+- PDF는 `CURI_DOCUMENT_BUCKET`의 비공개 `documents/` 접두사에만 업로드한다. EC2 인덱서는 해당 경로를 읽어 로컬 FAISS 인덱스를 재구축한다.
+- `scripts/prepare-rag-documents.mjs`는 Git 밖 staging에서 PDF와 `{filename}.metadata.json`을 생성한다. sidecar에는 `courseId`, `courseName`, `department`만 둔다.
+- 강의정보에 개인정보가 있으면 앱 시작 전 데이터 검증에서 실패한다.
 
-## 7. 보안·프라이버시
-- AWS Access Key를 저장하지 않는다.
-- EC2 인스턴스 역할의 기본 자격 증명 공급자 체인을 사용한다.
-- 원본 PDF와 강의계획서 ZIP은 Git·S3 앱 버킷에서 제외한다.
-- 실제 파생 데이터에 연락처·이메일·면담·민원 정보를 넣지 않는다.
-- Q&A 프롬프트에 정제 공식 강의정보만 보낸다.
-- 팁에는 자유서술과 직접 식별자를 받지 않는다.
-
-## 8. 검증 경계
-- 단위 테스트: 검색 순위·근거 없음·팁 검증·5건 임계치·집계
-- API 테스트: Q&A 세 상태, 팁 성공·검증 실패·중복
-- 로컬 브라우저: `docs/demo-script.md` 6단계
-- EC2: S3 정제 JSON 읽기와 Bedrock 실제 답변
-- 배포 전: 원본 ZIP·PDF·PEM·환경 파일이 빌드·Git 대상에 없는지 확인
+## 7. 검증 경계
+- 단위: 카탈로그 검증, 추천 비선호 제외·점수, 팁 임계치, RAG 과목 필터.
+- API: 세션 역할, 프로필, 추천 폴백, 시간표 지속성, Q&A 세 상태·로그, 팁 중복.
+- RAG 준비: 77개 매핑의 고유성, staging 경계, PDF sidecar 메타데이터, `documents/` 동기화 dry run.
+- EC2 RAG: Titan 임베딩 호출에 리전을 고정하지 않는지, 인덱스·청크 sidecar가 같은 버전인지, loopback retriever가 과목 ID가 다른 결과를 거부하는지 확인한다.
+- 브라우저: `docs/demo-script.md` 10단계, 데스크톱·모바일, 키보드·읽어주기.
+- 배포 전: 원본 zip·PDF·PEM·.env가 Git·EC2 배포 산출물에 없는지, 문서 버킷이 비공개인지 검사한다.
