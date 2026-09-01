@@ -1,4 +1,5 @@
 import type { TipAggregate } from "@/lib/tips";
+import type { AnonymousClassInsights } from "@curi/db";
 import { CuriMascot } from "./curi-mascot";
 
 export type ProfessorQaLog = {
@@ -12,6 +13,7 @@ export type ProfessorQaLog = {
 type ProfessorReportProps = {
   qaLogs: readonly ProfessorQaLog[];
   tipAggregate: TipAggregate;
+  classInsights?: AnonymousClassInsights;
 };
 
 function dateLabel(value: string): string {
@@ -22,7 +24,7 @@ function dateLabel(value: string): string {
   }).format(new Date(value));
 }
 
-export function ProfessorReport({ qaLogs, tipAggregate }: ProfessorReportProps) {
+export function ProfessorReport({ qaLogs, tipAggregate, classInsights }: ProfessorReportProps) {
   return (
     <main className="professor-report" aria-labelledby="professor-title">
       <header className="professor-header">
@@ -88,6 +90,49 @@ export function ProfessorReport({ qaLogs, tipAggregate }: ProfessorReportProps) 
             <p className="report-empty">응답 5건부터 집계를 공개합니다.</p>
           )}
         </section>
+
+        {classInsights ? (
+          <>
+            <section className="section-card" aria-labelledby="class-status-title">
+              <div className="section-heading">
+                <div>
+                  <p className="eyebrow">ANONYMOUS CLASS PULSE</p>
+                  <h2 id="class-status-title">익명 학급 현황</h2>
+                </div>
+                <span className="week-pill">학생 {classInsights.status.studentCount}명</span>
+              </div>
+              <dl className="class-status-grid">
+                <div><dt>온보딩</dt><dd>{classInsights.status.onboardingCount}명</dd></div>
+                <div><dt>평균 포인트</dt><dd>평균 {classInsights.status.averagePoints}P</dd></div>
+                <div><dt>획득 뱃지</dt><dd>{classInsights.status.badgeCount}개</dd></div>
+                <div><dt>완료 준비</dt><dd>{classInsights.status.checklistCompletionCount}개</dd></div>
+              </dl>
+              <p className="report-callout">모든 수치는 개인 식별정보 없이 집계됩니다.</p>
+            </section>
+
+            <section className="section-card" aria-labelledby="class-tmi-title">
+              <div className="section-heading">
+                <div>
+                  <p className="eyebrow">CLASS TMI</p>
+                  <h2 id="class-tmi-title">우리 학급 TMI</h2>
+                </div>
+                <span className="week-pill">프로필 {classInsights.tmi.profileCount}명</span>
+              </div>
+              {classInsights.tmi.visible ? (
+                <dl className="class-tmi-grid">
+                  {classInsights.tmi.topValues.map((item) => (
+                    <div key={item.field}>
+                      <dt>{item.label}</dt>
+                      <dd>{item.value}<span>{item.count}명</span></dd>
+                    </div>
+                  ))}
+                </dl>
+              ) : (
+                <p className="report-empty">프로필 응답 5명부터 공개합니다.</p>
+              )}
+            </section>
+          </>
+        ) : null}
       </div>
     </main>
   );

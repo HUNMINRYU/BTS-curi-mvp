@@ -28,6 +28,7 @@ export default async function ProfessorPage() {
 
   return (
     <ProfessorReport
+      classInsights={database.getAnonymousClassInsights()}
       qaLogs={qaLogs}
       tipAggregate={getTipAggregate(database, COURSE_ID)}
     />

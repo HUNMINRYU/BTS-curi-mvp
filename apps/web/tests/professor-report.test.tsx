@@ -42,3 +42,62 @@ test("교수 리포트는 근거 없음 질문이 없을 때 명확한 빈 상�
   const html = renderToStaticMarkup(<ProfessorReport qaLogs={[]} tipAggregate={aggregate} />);
   assert.match(html, /아직 기록된 근거 없음 질문이 없습니다/);
 });
+
+test("교수 리포트는 익명 학급 현황과 5명 이상 TMI 집계를 표시한다", () => {
+  const html = renderToStaticMarkup(
+    <ProfessorReport
+      qaLogs={[]}
+      tipAggregate={aggregate}
+      classInsights={{
+        status: {
+          studentCount: 6,
+          onboardingCount: 5,
+          totalPoints: 150,
+          averagePoints: 25,
+          badgeCount: 5,
+          checklistCompletionCount: 4,
+        },
+        tmi: {
+          profileCount: 5,
+          visible: true,
+          topValues: [
+            { field: "interest", label: "관심분야", value: "웹 개발", count: 3 },
+            { field: "goal", label: "학습 목표", value: "포트폴리오", count: 3 },
+            { field: "style", label: "학습 스타일", value: "직접 해보기", count: 4 },
+            { field: "hours", label: "주간 학습 시간", value: "주 3시간", count: 3 },
+          ],
+        },
+      }}
+    />,
+  );
+
+  assert.match(html, /익명 학급 현황/);
+  assert.match(html, /학생 6명/);
+  assert.match(html, /<dt>온보딩<\/dt><dd>5명<\/dd>/);
+  assert.match(html, /평균 25P/);
+  assert.match(html, /우리 학급 TMI/);
+  assert.match(html, /웹 개발/);
+  assert.match(html, /3명/);
+  assert.doesNotMatch(html, /테스트 학생|student-/);
+});
+
+test("교수 TMI는 프로필 응답 5명 미만이면 분포를 숨긴다", () => {
+  const html = renderToStaticMarkup(
+    <ProfessorReport
+      qaLogs={[]}
+      tipAggregate={aggregate}
+      classInsights={{
+        status: {
+          studentCount: 2,
+          onboardingCount: 2,
+          totalPoints: 60,
+          averagePoints: 30,
+          badgeCount: 2,
+          checklistCompletionCount: 0,
+        },
+        tmi: { profileCount: 2, visible: false, topValues: [] },
+      }}
+    />,
+  );
+  assert.match(html, /프로필 응답 5명부터 공개합니다/);
+});
