@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import type { CatalogCourse } from "@/lib/catalog-data";
-import { scheduleLabel } from "@/lib/course-schedule";
+import type { CatalogCourse } from "@/features/catalog/catalog-data";
+import { scheduleLabel } from "@/features/timetable/course-schedule";
 import type { CourseData } from "@/lib/types";
 import { SourceBadge } from "./source-badge";
 

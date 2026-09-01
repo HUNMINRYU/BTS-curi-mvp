@@ -4,7 +4,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 import { CourseDetail } from "../components/course-detail";
 import { CourseSyllabusContents } from "../components/course-syllabus-dialog";
-import { getCatalogCourse } from "../lib/catalog-data";
+import { getCatalogCourse } from "../features/catalog/catalog-data";
 import { getCourseData, getCurrentWeek } from "../lib/course-data";
 const tipAggregate = {
   count: 12,

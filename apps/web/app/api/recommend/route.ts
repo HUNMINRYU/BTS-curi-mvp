@@ -2,12 +2,12 @@ import type { ActiveSession, AppDatabase } from "@curi/db";
 
 import { getAppDatabase } from "@/lib/app-db";
 import { getActiveSession } from "@/features/auth/auth";
-import { getCatalog, type CatalogCourse } from "@/lib/catalog-data";
-import { generateRecommendationReasons } from "@/lib/recommend-bedrock";
+import { getCatalog, type CatalogCourse } from "@/features/catalog/catalog-data";
+import { generateRecommendationReasons } from "@/features/recommendations/recommend-bedrock";
 import {
   recommendCourses,
   type RecommendationReasonGenerator,
-} from "@/lib/recommendations";
+} from "@/features/recommendations/recommendations";
 
 const UNAUTHORIZED_ERROR = "로그인이 필요합니다.";
 const FORBIDDEN_ERROR = "학생 계정만 과목 추천을 받을 수 있습니다.";

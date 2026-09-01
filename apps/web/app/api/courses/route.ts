@@ -2,7 +2,7 @@ import type { ActiveSession, AppDatabase } from "@curi/db";
 
 import { getAppDatabase } from "@/lib/app-db";
 import { getActiveSession } from "@/features/auth/auth";
-import { getCatalog, type CatalogCourse } from "@/lib/catalog-data";
+import { getCatalog, type CatalogCourse } from "@/features/catalog/catalog-data";
 
 const UNAUTHORIZED_ERROR = "로그인이 필요합니다.";
 const FORBIDDEN_ERROR = "학생 계정만 시간표를 변경할 수 있습니다.";

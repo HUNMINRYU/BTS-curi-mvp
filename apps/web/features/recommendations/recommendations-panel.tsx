@@ -4,8 +4,8 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { SourceBadge } from "@/components/source-badge";
-import { scheduleLabel } from "@/lib/course-schedule";
-import type { RecommendationResult } from "@/lib/recommendations";
+import type { RecommendationResult } from "@/features/recommendations/recommendations";
+import { scheduleLabel } from "@/features/timetable/course-schedule";
 
 export type RecommendationsPanelProps = {
   initialData?: RecommendationResult;

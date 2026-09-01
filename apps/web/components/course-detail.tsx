@@ -1,7 +1,7 @@
 import Link from "next/link";
 
-import type { CatalogCourse } from "@/lib/catalog-data";
-import { scheduleLabel } from "@/lib/course-schedule";
+import type { CatalogCourse } from "@/features/catalog/catalog-data";
+import { scheduleLabel } from "@/features/timetable/course-schedule";
 import type { TipAggregate } from "@/lib/tips";
 import type { CourseData, WeekPlan } from "@/lib/types";
 import { CourseBackButton } from "./course-back-button";

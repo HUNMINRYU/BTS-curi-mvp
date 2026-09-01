@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { ProfessorReport, type ProfessorQaLog } from "@/components/professor-report";
 import { getAppDatabase } from "@/lib/app-db";
 import { SESSION_COOKIE_NAME } from "@/features/auth/auth";
-import { getCatalogCourse } from "@/lib/catalog-data";
+import { getCatalogCourse } from "@/features/catalog/catalog-data";
 import { getTipAggregate, seedDemoTips } from "@/lib/tip-data";
 
 const COURSE_ID = "web-content-development";

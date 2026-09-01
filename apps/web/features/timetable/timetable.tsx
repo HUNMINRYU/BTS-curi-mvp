@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 
-import type { CatalogCourse } from "@/lib/catalog-data";
-import { CuriMascot } from "./curi-mascot";
+import { CuriMascot } from "@/components/curi-mascot";
+import type { CatalogCourse } from "@/features/catalog/catalog-data";
 
 const DAYS = ["월", "화", "수", "목", "금", "토", "일"] as const;
 const PERIODS = Array.from({ length: 15 }, (_, index) => index + 1);

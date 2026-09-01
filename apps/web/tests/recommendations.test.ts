@@ -2,14 +2,17 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { RecommendationsPanel } from "../components/recommendations-panel";
+import { RecommendationsPanel } from "../features/recommendations/recommendations-panel";
 
 
 import type { UserProfile } from "@curi/db";
 
-import { getCatalog, type CatalogCourse } from "../lib/catalog-data";
+import { getCatalog, type CatalogCourse } from "../features/catalog/catalog-data";
 import { PROFILE_OPTIONS } from "../features/onboarding/profile-options";
-import { filterAndRankCourses, recommendCourses } from "../lib/recommendations";
+import {
+  filterAndRankCourses,
+  recommendCourses,
+} from "../features/recommendations/recommendations";
 
 
 const completedAt = "2026-09-01T00:00:00.000Z";

@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { renderToStaticMarkup } from "react-dom/server";
 
-import { periodLabel, periodTime, Timetable } from "../components/timetable";
-import type { CatalogCourse } from "../lib/catalog-data";
+import type { CatalogCourse } from "../features/catalog/catalog-data";
+import { periodLabel, periodTime, Timetable } from "../features/timetable/timetable";
 
 const webCourse: CatalogCourse = {
   id: "web-course",

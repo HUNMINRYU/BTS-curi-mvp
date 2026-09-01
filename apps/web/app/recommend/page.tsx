@@ -1,4 +1,4 @@
-import { RecommendationsPanel } from "@/components/recommendations-panel";
+import { RecommendationsPanel } from "@/features/recommendations/recommendations-panel";
 
 export default function RecommendPage() {
   return (

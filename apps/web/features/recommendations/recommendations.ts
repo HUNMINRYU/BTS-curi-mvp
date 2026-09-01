@@ -1,6 +1,6 @@
 import type { UserProfile } from "@curi/db";
 
-import type { CatalogCourse } from "./catalog-data";
+import type { CatalogCourse } from "@/features/catalog/catalog-data";
 
 export type RankedCourse = {
   course: CatalogCourse;

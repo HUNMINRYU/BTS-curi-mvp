@@ -6,7 +6,7 @@ import { createAppDatabase, type UserProfile } from "@curi/db";
 import { createCredentialTestUser } from "./helpers/auth";
 
 import { createRecommendHandlers } from "../app/api/recommend/route";
-import type { CatalogCourse } from "../lib/catalog-data";
+import type { CatalogCourse } from "../features/catalog/catalog-data";
 
 const now = new Date("2026-09-01T00:00:00.000Z");
 const expiry = new Date(now.getTime() + 86_400_000).toISOString();

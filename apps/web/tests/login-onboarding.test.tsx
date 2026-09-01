@@ -14,7 +14,7 @@ import {
   onboardingSubmissionError,
   saveOnboardingProfile,
 } from "../features/onboarding/onboarding-wizard";
-import { recommendationError } from "../components/recommendations-panel";
+import { recommendationError } from "../features/recommendations/recommendations-panel";
 
 const savedProfile = {
   major: "컴퓨터공학과",

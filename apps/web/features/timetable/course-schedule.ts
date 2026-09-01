@@ -1,4 +1,4 @@
-import type { CatalogCourse } from "./catalog-data";
+import type { CatalogCourse } from "@/features/catalog/catalog-data";
 
 export function scheduleLabel(course: CatalogCourse): string {
   const { schedule } = course;

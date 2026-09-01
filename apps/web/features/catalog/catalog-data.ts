@@ -1,4 +1,4 @@
-import catalogJson from "../data/catalog.json";
+import catalogJson from "@/data/catalog.json";
 
 const DAYS = ["월", "화", "수", "목", "금", "토", "일"] as const;
 const DIFFICULTIES = ["입문", "중급", "심화"] as const;

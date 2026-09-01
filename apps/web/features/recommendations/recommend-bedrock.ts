@@ -1,6 +1,9 @@
 import { BedrockRuntimeClient, ConverseCommand } from "@aws-sdk/client-bedrock-runtime";
 
-import type { RecommendationCandidate, RecommendationProfile } from "./recommendations";
+import type {
+  RecommendationCandidate,
+  RecommendationProfile,
+} from "@/features/recommendations/recommendations";
 
 const MODEL_ID = "global.anthropic.claude-sonnet-5";
 const client = new BedrockRuntimeClient({});

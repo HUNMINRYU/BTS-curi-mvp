@@ -8,9 +8,9 @@ import { AppTopbarClient } from "../components/app-topbar-client";
 import { CuriMascot, rewardPresentation } from "../components/curi-mascot";
 import { CuriReward } from "../components/curi-reward";
 import { CourseDetail } from "../components/course-detail";
-import { RecommendationsPanel } from "../components/recommendations-panel";
+import { RecommendationsPanel } from "../features/recommendations/recommendations-panel";
 import { QaPanel } from "../components/qa-panel";
-import { getCatalogCourse } from "../lib/catalog-data";
+import { getCatalogCourse } from "../features/catalog/catalog-data";
 import { getCourseData, getCurrentWeek } from "../lib/course-data";
 import { appMetadata } from "../lib/app-metadata";
 

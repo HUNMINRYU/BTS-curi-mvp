@@ -1,6 +1,6 @@
 
 import { CuriReward } from "@/components/curi-reward";
-import { Timetable } from "@/components/timetable";
+import { Timetable } from "@/features/timetable/timetable";
 
 export default function Home() {
   return (

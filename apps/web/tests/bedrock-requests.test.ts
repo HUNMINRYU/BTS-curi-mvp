@@ -4,7 +4,10 @@ import test from "node:test";
 import { BedrockRuntimeClient } from "@aws-sdk/client-bedrock-runtime";
 
 import { buildAnswerCommand } from "../lib/bedrock";
-import { buildRecommendationCommand, generateRecommendationReasons } from "../lib/recommend-bedrock";
+import {
+  buildRecommendationCommand,
+  generateRecommendationReasons,
+} from "../features/recommendations/recommend-bedrock";
 import type { Citation } from "../lib/types";
 
 const citation: Citation = {
