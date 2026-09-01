@@ -1,8 +1,11 @@
 # Secrets and credentials
 *.pem
+*.zip
 조1_광주대.zip
+조1/
 광주대 * 강의계획서.zip
 교양 - 이러닝.zip
+학교안심 알림장/
 *.pdf
 .env
 .env.*
@@ -32,3 +35,13 @@ cdk.out/
 *.sqlite-shm
 *.log
 .DS_Store
+
+# Local agent and orchestration state
+.omo/
+.omp/
+.claude/
+.gstack/
+WATCHDOG.md
+CLAUDE.md
+KakaoTalk_*
+심사기준.png
