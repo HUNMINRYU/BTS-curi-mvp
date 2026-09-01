@@ -27,6 +27,7 @@ cdk.out/
 *.tsbuildinfo
 
 # Local data and logs
+.local-docs/
 *.db
 *.db-journal
 *.sqlite

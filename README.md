@@ -198,8 +198,7 @@ private key와 테스트 계정 비밀번호는 GitHub Secrets·EC2 `web.env`에
 
 | 문서 | 내용 |
 | --- | --- |
-| [`docs/pitch.md`](docs/pitch.md) | 발표 대본 |
-| [`docs/demo-script.md`](docs/demo-script.md) | 상세 시연 대본 |
 | [`docs/architecture.md`](docs/architecture.md) | 시스템 구조도와 라우트·검증 기준 |
+| [`docs/decisions.md`](docs/decisions.md) | 주요 기술·제품 결정 기록 |
 | [`docs/prd.md`](docs/prd.md) | 요구사항과 범위 |
-| [`docs/full-project-handoff.md`](docs/full-project-handoff.md) | 환경 설정부터 피벗, 구현, AWS/RAG, 검증, 남은 위험까지의 전체 기록. 새 에이전트는 이 문서를 먼저 읽고 현재 HEAD에서 검증을 다시 실행 |
+| [`docs/vision.md`](docs/vision.md) | 문제 정의와 MVP 가치 |

@@ -208,5 +208,5 @@ CREATE TABLE earned_badges (
 - API: 세션 역할, 프로필, 추천 폴백, 시간표 지속성, Q&A 세 상태·로그, 팁 중복.
 - 계획된 S3 RAG 준비: 77개 매핑의 고유성, staging 경계, PDF sidecar 메타데이터, `documents/` 동기화 dry run. 현재 배포 검증 항목은 아니다.
 - EC2 RAG: Titan 임베딩 호출에 리전을 고정하지 않는지, 인덱스·청크 sidecar가 같은 버전인지, loopback retriever가 과목 ID가 다른 결과를 거부하는지 확인한다.
-- 브라우저: `docs/demo-script.md` 데모 동선, 데스크톱·모바일, 마우스 없이 키보드만으로 통과. 음성 읽어주기(Web Speech)는 이번 범위에서 제외한다.
+- 브라우저: 핵심 학생·교수 데모 동선을 데스크톱·모바일에서 마우스 없이 키보드만으로 통과한다. 음성 읽어주기(Web Speech)는 이번 범위에서 제외한다.
 - 계획된 S3 절차를 배포하기 전에는 원본 zip·PDF·PEM·.env가 Git·EC2 배포 산출물에 없는지, 문서 버킷이 비공개인지 검사한다.
