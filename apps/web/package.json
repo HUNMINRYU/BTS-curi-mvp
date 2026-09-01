@@ -5,11 +5,14 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "test": "tsx --test tests/*.test.ts",
+    "start": "next start",
+    "test": "tsx --test tests/*.test.ts tests/*.test.tsx",
     "typecheck": "tsc --noEmit",
     "lint": "eslint ."
   },
   "dependencies": {
+    "@aws-sdk/client-bedrock-runtime": "3.1123.0",
+    "@curi/db": "workspace:*",
     "next": "16.3.4",
     "react": "19.2.8",
     "react-dom": "19.2.8"

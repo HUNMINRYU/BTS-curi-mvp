@@ -2,6 +2,8 @@
 *.pem
 조1_광주대.zip
 광주대 * 강의계획서.zip
+교양 - 이러닝.zip
+*.pdf
 .env
 .env.*
 !.env.example
@@ -26,5 +28,7 @@ cdk.out/
 *.db-journal
 *.sqlite
 *.sqlite3
+*.sqlite-wal
+*.sqlite-shm
 *.log
 .DS_Store

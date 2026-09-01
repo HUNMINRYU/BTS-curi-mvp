@@ -3,6 +3,7 @@ packages:
   - packages/*
   - infra
 allowBuilds:
+  better-sqlite3: true
   esbuild: true
   unrs-resolver: true
 minimumReleaseAgeExclude:
@@ -18,3 +19,6 @@ minimumReleaseAgeExclude:
   - '@next/swc-win32-x64-msvc@16.3.4'
   - eslint-config-next@16.3.4
   - next@16.3.4
+  - '@aws-sdk/client-bedrock-runtime@3.1123.0'
+  - '@aws-sdk/credential-provider-node@3.972.82'
+  - '@aws-sdk/token-providers@3.1123.0'

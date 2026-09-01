@@ -11,6 +11,10 @@
     "lint": "tsc --noEmit"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "9.6.0",
     "typescript": "5.9.3"
+  },
+  "dependencies": {
+    "better-sqlite3": "12.6.2"
   }
 }
