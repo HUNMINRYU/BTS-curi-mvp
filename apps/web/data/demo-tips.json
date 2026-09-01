@@ -1,0 +1,110 @@
+[
+  {
+    "demoKey": "web-content-development-demo-01",
+    "courseId": "web-content-development",
+    "prerequisite": 1,
+    "practice": 3,
+    "workload": 2,
+    "tags": ["HTML/CSS 기초", "VS Code 설치"],
+    "isDemo": true
+  },
+  {
+    "demoKey": "web-content-development-demo-02",
+    "courseId": "web-content-development",
+    "prerequisite": 2,
+    "practice": 3,
+    "workload": 2,
+    "tags": ["Chrome 설치", "JavaScript 기초"],
+    "isDemo": true
+  },
+  {
+    "demoKey": "web-content-development-demo-03",
+    "courseId": "web-content-development",
+    "prerequisite": 1,
+    "practice": 2,
+    "workload": 2,
+    "tags": ["HTML/CSS 기초", "GitHub 계정"],
+    "isDemo": true
+  },
+  {
+    "demoKey": "web-content-development-demo-04",
+    "courseId": "web-content-development",
+    "prerequisite": 2,
+    "practice": 3,
+    "workload": 3,
+    "tags": ["VS Code 설치", "JavaScript 기초"],
+    "isDemo": true
+  },
+  {
+    "demoKey": "web-content-development-demo-05",
+    "courseId": "web-content-development",
+    "prerequisite": 1,
+    "practice": 2,
+    "workload": 1,
+    "tags": ["HTML/CSS 기초"],
+    "isDemo": true
+  },
+  {
+    "demoKey": "web-content-development-demo-06",
+    "courseId": "web-content-development",
+    "prerequisite": 3,
+    "practice": 3,
+    "workload": 3,
+    "tags": ["JavaScript 기초", "GitHub 계정"],
+    "isDemo": true
+  },
+  {
+    "demoKey": "web-content-development-demo-07",
+    "courseId": "web-content-development",
+    "prerequisite": 2,
+    "practice": 2,
+    "workload": 2,
+    "tags": ["Chrome 설치", "VS Code 설치"],
+    "isDemo": true
+  },
+  {
+    "demoKey": "web-content-development-demo-08",
+    "courseId": "web-content-development",
+    "prerequisite": 1,
+    "practice": 3,
+    "workload": 2,
+    "tags": ["HTML/CSS 기초", "Chrome 설치"],
+    "isDemo": true
+  },
+  {
+    "demoKey": "web-content-development-demo-09",
+    "courseId": "web-content-development",
+    "prerequisite": 2,
+    "practice": 2,
+    "workload": 3,
+    "tags": ["JavaScript 기초"],
+    "isDemo": true
+  },
+  {
+    "demoKey": "web-content-development-demo-10",
+    "courseId": "web-content-development",
+    "prerequisite": 1,
+    "practice": 2,
+    "workload": 2,
+    "tags": ["GitHub 계정", "VS Code 설치"],
+    "isDemo": true
+  },
+  {
+    "demoKey": "web-content-development-demo-11",
+    "courseId": "web-content-development",
+    "prerequisite": 3,
+    "practice": 3,
+    "workload": 3,
+    "tags": ["HTML/CSS 기초", "JavaScript 기초"],
+    "isDemo": true
+  },
+  {
+    "demoKey": "web-content-development-demo-12",
+    "courseId": "web-content-development",
+    "prerequisite": 2,
+    "practice": 2,
+    "workload": 1,
+    "tags": ["Chrome 설치", "GitHub 계정"],
+    "isDemo": true
+  }
+]

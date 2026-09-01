@@ -8,6 +8,12 @@ export type Citation = {
   excerpt: string;
 };
 
+export type QaResult = {
+  status: "answered" | "not_found" | "model_error";
+  answer: string;
+  citations: Citation[];
+};
+
 export type Preparation = {
   id: string;
   label: string;

@@ -57,3 +57,7 @@ export function getCurrentWeek(): WeekPlan {
   }
   return current;
 }
+
+export function getOfficialCitations(): Citation[] {
+  return courseData.weeks.flatMap((week) => [week.source, ...week.preparations.map(({ source }) => source)]);
+}
