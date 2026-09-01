@@ -9,7 +9,7 @@ import {
   isGamificationSummary,
   publishGamification,
   type GamificationSummary,
-} from "@/lib/gamification";
+} from "@/features/gamification/client";
 
 
 export type ChecklistState = {

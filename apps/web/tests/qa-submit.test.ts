@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { askCourseQuestion } from "../features/qa/qa-panel";
-import type { GamificationSummary } from "../lib/gamification";
+import type { GamificationSummary } from "../features/gamification/client";
 
 const gamification = {
   totalPoints: 5,

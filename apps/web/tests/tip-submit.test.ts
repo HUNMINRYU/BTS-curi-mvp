@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { submitTip } from "../features/tips/tip-submit";
-import type { GamificationSummary } from "../lib/gamification";
+import type { GamificationSummary } from "../features/gamification/client";
 
 const aggregate = {
   count: 13,

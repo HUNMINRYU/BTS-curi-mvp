@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { saveChecklistItem } from "../features/course/weekly-coach";
-import type { GamificationSummary } from "../lib/gamification";
+import type { GamificationSummary } from "../features/gamification/client";
 
 const gamification = {
   totalPoints: 10,

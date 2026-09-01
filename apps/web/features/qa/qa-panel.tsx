@@ -9,7 +9,7 @@ import {
   isGamificationSummary,
   publishGamification,
   type GamificationSummary,
-} from "@/lib/gamification";
+} from "@/features/gamification/client";
 
 function isQaResult(payload: unknown): payload is QaResult {
   if (typeof payload !== "object" || payload === null) return false;
