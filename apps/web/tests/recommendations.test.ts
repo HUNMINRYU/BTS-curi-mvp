@@ -255,7 +255,7 @@ test("추천 패널은 이유·출처·선수지식·일정과 시간표 담기 
 
   assert.match(html, /aria-labelledby="recommendations-title"/);
   assert.match(html, /웹 개발 관심과 포트폴리오 목표에 맞는 수업입니다/);
-  assert.match(html, /실제 강의계획서/);
+  assert.match(html, /source-badge--actual">강의계획서</);
   assert.match(html, /선수지식/);
   assert.match(html, /월요일 09:00 · 2시간/);
   assert.match(html, /시간표에 담기/);
@@ -273,6 +273,22 @@ test("추천 패널은 시간 미정 과목의 일정을 안전하게 표시한�
   }));
 
   assert.match(html, /시간 미정/);
+});
+
+test("추천 카드 제목은 과목 상세 페이지로 직접 연결된다", () => {
+  const recommendation = course({ id: "web-course", name: "웹콘텐츠개발" });
+  const html = renderToStaticMarkup(createElement(RecommendationsPanel, {
+    initialData: {
+      recommendations: [{ course: recommendation, score: 100, reason: "웹 개발 관심에 맞는 수업입니다." }],
+      reasonStatus: "ok",
+      message: null,
+    },
+    initialSelectedCourseIds: [],
+  }));
+
+  assert.match(html, /<article class="recommendation-card" aria-labelledby="recommendation-web-course">/);
+  assert.match(html, /<h3 id="recommendation-web-course"><a href="\/courses\/web-course">웹콘텐츠개발<\/a><\/h3>/);
+  assert.match(html, /시간표에 담기/);
 });
 
 test("추천 패널은 이미 시간표에 담긴 과목의 중복 추가를 비활성화한다", () => {

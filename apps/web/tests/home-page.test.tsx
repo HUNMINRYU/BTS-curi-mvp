@@ -11,6 +11,6 @@ test("홈은 모바일에서 단어 단위 제목과 간결한 진행 상태를 
     html,
     /<h1>이번 학기,<br\/><span class="student-title-nowrap"><em>내 시간표<\/em>에서<\/span> <span class="student-title-nowrap">시작해요\.<\/span><\/h1>/,
   );
-  assert.match(html, /강의계획서와 시간표를 한곳에서 확인하고, 나에게 맞는 다음 수업을 찾아보세요\./);
+  assert.match(html, /학생의 전공·관심·목표를 이해해 맞춤 과목을 추천하고, 수업 준비부터 실행까지 안내하는 AI 학습 내비게이터/);
   assert.match(html, /class="curi-reward curi-reward--start curi-reward--compact"/);
 });

@@ -1,8 +1,10 @@
 import Link from "next/link";
 
 import type { CatalogCourse } from "@/lib/catalog-data";
+import { scheduleLabel } from "@/lib/course-schedule";
 import type { TipAggregate } from "@/lib/tips";
 import type { CourseData, WeekPlan } from "@/lib/types";
+import { CourseBackButton } from "./course-back-button";
 import { CourseRoadmap } from "./course-roadmap";
 import { CourseSyllabusDialog } from "./course-syllabus-dialog";
 import { QaPanel } from "./qa-panel";
@@ -21,6 +23,7 @@ type CourseDetailProps = {
 function CourseHeader({ course, details }: { course: CatalogCourse; details?: CourseData }) {
   return (
     <header className="course-detail-header">
+      <CourseBackButton />
       <Link className="course-detail-back" href="/">← 내 시간표</Link>
       <div className="course-detail-heading">
         <div>
@@ -43,13 +46,13 @@ function CatalogCourseDetail({ course }: { course: CatalogCourse }) {
       <section className="catalog-detail-grid" aria-label="과목 기본 정보">
         <article className="section-card">
           <p className="eyebrow">BEFORE CLASS</p>
-          <h2>선수지식</h2>
-          {course.prerequisites.length > 0 ? (
-            <ul>{course.prerequisites.map((item) => <li key={item}>{item}</li>)}</ul>
-          ) : (
-            <p>필수 선수지식이 없습니다.</p>
-          )}
-          <h2>관련 학습 목표</h2>
+          <h2 className="catalog-detail-heading">선수지식</h2>
+          <p className="catalog-detail-value">{course.prerequisites.length > 0
+            ? course.prerequisites.join(", ")
+            : "별도 선수지식 없음"}</p>
+          <h2 className="catalog-detail-heading">일정</h2>
+          <p className="catalog-detail-value">{scheduleLabel(course)}</p>
+          <h2 className="catalog-detail-heading">관련 학습 목표</h2>
           <ul>{course.goalKeywords.map((keyword) => <li key={keyword}>{keyword}</li>)}</ul>
         </article>
       </section>

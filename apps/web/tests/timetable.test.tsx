@@ -59,9 +59,30 @@ test("시간표는 15교시 그리드의 점유 과목을 키보드 링크와 �
   }
   assert.match(html, /class="timetable-recommendation-cta"/);
   assert.match(html, /src="\/characters\/curi-calendar\.png"/);
-  assert.match(html, /개인 맞춤 과목 추천/);
+  assert.match(html, /과목 추천받기/);
   assert.match(html, /전공·관심·목표에 맞는 수업 찾기/);
   assert.match(html, /href="\/recommend"/);
+});
+
+test("데스크톱 시간표 카드는 수업 시간과 학과 메타 배지를 표시한다", () => {
+  const html = renderToStaticMarkup(
+    <Timetable initialCourses={[webCourse, practicalCourse]} />,
+  );
+
+  assert.match(html, /timetable-course[\s\S]*?웹콘텐츠개발[\s\S]*?09:00–10:50 · 2교시/);
+  assert.match(html, /timetable-course-badge[^>]*>컴퓨터공학과</);
+  assert.match(html, /timetable-course[\s\S]*?건축설계실기[\s\S]*?21:00–22:50 · 2교시/);
+});
+
+test("모바일 시간표는 선택한 요일의 수업만 보여주고 전체 탭으로 전환할 수 있다", () => {
+  const html = renderToStaticMarkup(
+    <Timetable initialCourses={[webCourse, practicalCourse, unscheduledCourse]} />,
+  );
+
+  assert.match(html, /aria-selected="true"[^>]*>월</);
+  assert.match(html, /aria-selected="false"[^>]*>전체</);
+  assert.match(html, /timetable-mobile-panel[\s\S]*?웹콘텐츠개발/);
+  assert.doesNotMatch(html, /timetable-mobile-panel[\s\S]*건축설계실기/);
 });
 
 test("모바일 시간표는 첫 실제 수업 요일을 선택하고 전체 탭을 제공한다", () => {
@@ -85,6 +106,16 @@ test("시간표는 비어 있을 때 추천 화면으로 가는 명확한 다음
   assert.match(html, /시간표가 비어 있습니다/);
   assert.match(html, /src="\/characters\/curi-sleeping\.png"/);
   assert.match(html, /href="\/recommend"/);
+});
+
+test("데스크톱 시간표는 시간 미정 과목을 그리드 밖 별도 목록에 링크·제거 조작과 함께 표시한다", () => {
+  const html = renderToStaticMarkup(
+    <Timetable initialCourses={[webCourse, unscheduledCourse]} />,
+  );
+
+  assert.match(html, /class="timetable-unscheduled"/);
+  assert.match(html, /timetable-unscheduled[\s\S]*?href="\/courses\/unscheduled-course"[\s\S]*?시간 미정 과목/);
+  assert.match(html, /timetable-unscheduled[\s\S]*?aria-label="시간 미정 과목 시간표에서 빼기"/);
 });
 
 test("시간이 미정인 과목은 임의의 교시 없이 목록에 표시된다", () => {

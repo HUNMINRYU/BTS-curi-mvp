@@ -169,6 +169,13 @@ export function AppTopbarClient({ currentPath, gamification: initialGamification
                   <span>Lv.{gamification.level}</span>
                 </span>
               ) : null}
+              {user.role === "student" && gamification && gamification.badges.length > 0 ? (
+                <ul className="topbar-badges" aria-label="획득한 배지">
+                  {gamification.badges.map((badge) => (
+                    <li className="topbar-badge" key={badge}>{badge}</li>
+                  ))}
+                </ul>
+              ) : null}
             </div>
           ) : null}
           {user ? (

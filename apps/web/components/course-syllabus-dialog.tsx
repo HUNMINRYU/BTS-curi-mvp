@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import type { CatalogCourse } from "@/lib/catalog-data";
+import { scheduleLabel } from "@/lib/course-schedule";
 import type { CourseData } from "@/lib/types";
 import { SourceBadge } from "./source-badge";
 
@@ -12,14 +13,6 @@ type CourseSyllabusProps = {
   course: CatalogCourse;
   details?: CourseData;
 };
-
-function scheduleLabel(course: CatalogCourse): string {
-  const { schedule } = course;
-
-  if (!schedule) return "시간 정보 없음";
-
-  return `${schedule.day}요일 ${String(schedule.start).padStart(2, "0")}:00 · ${schedule.duration}시간`;
-}
 
 export function CourseSyllabusContents({ course, details }: CourseSyllabusProps) {
   return (

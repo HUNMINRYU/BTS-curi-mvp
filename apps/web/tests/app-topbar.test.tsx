@@ -39,6 +39,29 @@ test("student topbar exposes navigation, exact points and level, and logout", ()
   assert.match(markup, /aria-live="polite"[^>]*aria-atomic="true"/);
 });
 
+test("student topbar renders every earned badge visibly in the account area", () => {
+  const markup = renderToStaticMarkup(
+    <AppTopbarClient
+      currentPath="/"
+      gamification={{ totalPoints: 30, level: 1, badges: ["나를 아는 학생", "호기심 탐험가"], newlyEarnedBadges: [] }}
+      user={{ id: "student-test", name: "테스트 학생", role: "student" }}
+    />,
+  );
+
+  assert.match(markup, /<ul[^>]*aria-label="획득한 배지"[^>]*>/);
+  assert.match(markup, /aria-label="획득한 배지"[\s\S]*?<li[^>]*>나를 아는 학생<\/li>/);
+  assert.match(markup, /aria-label="획득한 배지"[\s\S]*?<li[^>]*>호기심 탐험가<\/li>/);
+
+  const emptyMarkup = renderToStaticMarkup(
+    <AppTopbarClient
+      currentPath="/"
+      gamification={{ totalPoints: 0, level: 1, badges: [], newlyEarnedBadges: [] }}
+      user={{ id: "student-test", name: "테스트 학생", role: "student" }}
+    />,
+  );
+  assert.doesNotMatch(emptyMarkup, /획득한 배지/);
+});
+
 test("professor topbar provides a click-only professor path without student points", () => {
   const markup = renderToStaticMarkup(
     <AppTopbarClient

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { SourceBadge } from "@/components/source-badge";
-import type { CatalogCourse } from "@/lib/catalog-data";
+import { scheduleLabel } from "@/lib/course-schedule";
 import type { RecommendationResult } from "@/lib/recommendations";
 
 export type RecommendationsPanelProps = {
@@ -71,11 +71,6 @@ function selectedCourseIds(value: unknown): readonly string[] | null {
       : null
   ));
   return ids.every((id): id is string => id !== null) ? ids : null;
-}
-
-function scheduleLabel(course: CatalogCourse): string {
-  if (!course.schedule) return "시간 미정";
-  return `${course.schedule.day}요일 ${String(course.schedule.start).padStart(2, "0")}:00 · ${course.schedule.duration}시간`;
 }
 
 export function RecommendationsPanel({ initialData, initialSelectedCourseIds }: RecommendationsPanelProps) {
@@ -209,7 +204,9 @@ export function RecommendationsPanel({ initialData, initialSelectedCourseIds }: 
                   <div className="recommendation-card-header">
                     <div>
                       <p className="course-department">{recommendation.course.department}</p>
-                      <h3 id={titleId}>{recommendation.course.name}</h3>
+                      <h3 id={titleId}>
+                        <Link href={`/courses/${recommendation.course.id}`}>{recommendation.course.name}</Link>
+                      </h3>
                     </div>
                     <SourceBadge sourceKind={recommendation.course.sourceKind} />
                   </div>

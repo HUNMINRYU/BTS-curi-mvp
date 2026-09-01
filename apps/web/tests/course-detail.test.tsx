@@ -29,10 +29,13 @@ test("대표 과목 상세는 15주 로드맵과 개인 목표가 반영된 이�
     />,
   );
   assert.match(markup, /class="checklist-goal"[^>]*>포트폴리오 완성 목표에 맞춘 준비 행동입니다\.<\/p>/);
+  assert.match(markup, /aria-label="이전 페이지로 돌아가기"/);
+  assert.match(markup, /class="course-detail-back-mobile"/);
+  assert.match(markup, /class="course-detail-back" href="\/"/);
   assert.match(markup, /웹컨텐츠개발/);
   assert.match(markup, /개인 목표 · 포트폴리오 완성/);
   assert.equal((markup.match(/class="roadmap-item /g) ?? []).length, 15);
-  assert.match(markup, /실제 강의계획서/);
+  assert.match(markup, /source-badge--actual">강의계획서</);
   assert.match(markup, /데모 데이터/);
   assert.match(markup, /AI 도우미 열기/);
   assert.match(markup, /aria-controls="course-syllabus-dialog"/);
@@ -70,6 +73,9 @@ test("일반 과목 상세는 카탈로그의 개요와 선수지식만 제공�
   assert.match(markup, /데이터베이스실습/);
   assert.match(markup, /심화/);
   assert.match(markup, /선수지식/);
+  assert.match(markup, /<h2 class="catalog-detail-heading">일정<\/h2>/);
+  assert.match(markup, /catalog-detail-value">수요일 09:00 · 2시간</);
+  assert.equal((markup.match(/class="catalog-detail-heading"/g) ?? []).length, 3);
   assert.match(markup, /aria-controls="course-syllabus-dialog"/);
   assert.match(markup, />강의계획서 보기<\/button>/);
   assert.match(markup, /데이터베이스/);

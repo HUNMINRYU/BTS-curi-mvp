@@ -152,7 +152,7 @@ export function Timetable({ initialCourses }: TimetableProps) {
         <a className="timetable-recommendation-cta" href="/recommend">
           <CuriMascot className="timetable-recommendation-mascot" variant={courses?.length === 0 ? "sleeping" : "calendar"} />
           <span>
-            <strong>개인 맞춤 과목 추천</strong>
+            <strong>과목 추천받기</strong>
             <small>전공·관심·목표에 맞는 수업 찾기</small>
           </span>
           <b aria-hidden="true">→</b>
@@ -172,7 +172,7 @@ export function Timetable({ initialCourses }: TimetableProps) {
         const unscheduledCourses = courses.filter((course) => !hasSchedule(course));
         const mobileTab = selectedMobileTab ?? firstScheduledDay(courses) ?? "all";
 
-        function renderMobileCourseList(courseList: readonly CatalogCourse[]) {
+        function renderCourseList(courseList: readonly CatalogCourse[]) {
           return (
             <ul>
               {courseList.map((course) => (
@@ -180,6 +180,9 @@ export function Timetable({ initialCourses }: TimetableProps) {
                   <div>
                     <a href={`/courses/${course.id}`}>{course.name}</a>
                     <span>{hasSchedule(course) ? courseTimeLabel(course.schedule) : "시간 미정"}</span>
+                    <span className="timetable-course-badges">
+                      <span className="timetable-course-badge">{course.department}</span>
+                    </span>
                   </div>
                   <button
                     aria-label={`${course.name} 시간표에서 빼기`}
@@ -197,6 +200,7 @@ export function Timetable({ initialCourses }: TimetableProps) {
 
         return (
           <>
+            <div className="timetable-grid-scroll">
             <div className="timetable-grid" role="grid" aria-label="주간 시간표">
               <div role="row" style={{ display: "contents" }}>
                 <span aria-hidden="true" className="timetable-corner" />
@@ -233,6 +237,10 @@ export function Timetable({ initialCourses }: TimetableProps) {
                         }}
                       >
                         <a href={`/courses/${course.id}`}>{course.name}</a>
+                        <span className="timetable-course-time">{courseTimeLabel(course.schedule)}</span>
+                        <span className="timetable-course-badges">
+                          <span className="timetable-course-badge">{course.department}</span>
+                        </span>
                         <button
                           aria-label={`${course.name} 시간표에서 빼기`}
                           disabled={removingCourseId === course.id}
@@ -246,6 +254,13 @@ export function Timetable({ initialCourses }: TimetableProps) {
                 </div>
               ))}
             </div>
+            </div>
+            {unscheduledCourses.length > 0 ? (
+              <div className="timetable-unscheduled" aria-label="시간 미정 과목">
+                <h3>시간 미정</h3>
+                {renderCourseList(unscheduledCourses)}
+              </div>
+            ) : null}
             <div className="timetable-mobile-list">
               <div aria-label="모바일 시간표 요일 선택" className="timetable-mobile-tabs" role="tablist">
                 {DAYS.map((day) => (
@@ -287,14 +302,14 @@ export function Timetable({ initialCourses }: TimetableProps) {
                     return (
                       <section key={day}>
                         <h3>{day}요일</h3>
-                        {renderMobileCourseList(dayCourses)}
+                        {renderCourseList(dayCourses)}
                       </section>
                     );
                   })}
                   {unscheduledCourses.length > 0 ? (
                     <section>
                       <h3>시간 미정</h3>
-                      {renderMobileCourseList(unscheduledCourses)}
+                      {renderCourseList(unscheduledCourses)}
                     </section>
                   ) : null}
                 </div>
@@ -306,7 +321,7 @@ export function Timetable({ initialCourses }: TimetableProps) {
                   role="tabpanel"
                 >
                   <h3>{mobileTab}요일</h3>
-                  {renderMobileCourseList(
+                  {renderCourseList(
                     scheduledCourses.filter((course) => course.schedule.day === mobileTab),
                   )}
                 </div>

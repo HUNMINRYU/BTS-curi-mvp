@@ -1,7 +1,7 @@
 import type { SourceKind } from "@/lib/types";
 
 const labels: Record<SourceKind, string> = {
-  actual: "실제 강의계획서",
+  actual: "강의계획서",
   demo: "데모 데이터",
 };
 
