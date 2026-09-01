@@ -1,1 +1,26 @@
-export {};
+export {
+  createAppDatabase,
+  createTipsDatabase,
+  DuplicateCourseTipError,
+  DuplicateUsernameError,
+  type ActiveSession,
+  type AppCourseTip,
+  type AppDatabase,
+  type AppUser,
+  type CredentialRecord,
+  type CredentialUserInput,
+  type DemoCourseTipInput,
+  type NewCourseTip,
+  type NewSession,
+  type GamificationSummary,
+  type QaLogSummary,
+  type StoredCourseTip,
+  type TipsDatabase,
+  type UserCourseTipInput,
+  type UserProfile,
+  type UserRole,
+  type ChecklistAwardInput,
+  type UserCourse,
+  type UserCourseTipAwardInput,
+} from "./database";
+export { APP_DATABASE_SCHEMA, COURSE_TIPS_SCHEMA } from "./schema";
