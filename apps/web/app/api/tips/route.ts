@@ -5,7 +5,7 @@ import {
 } from "@curi/db";
 
 import { getAppDatabase } from "@/lib/app-db";
-import { getActiveSession } from "@/lib/auth";
+import { getActiveSession } from "@/features/auth/auth";
 import { getTipAggregate, seedDemoTips } from "@/lib/tip-data";
 import { TipValidationError, validateTipInput } from "@/lib/tips";
 

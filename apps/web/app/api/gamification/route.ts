@@ -1,7 +1,7 @@
 import type { ActiveSession, AppDatabase } from "@curi/db";
 
 import { getAppDatabase } from "@/lib/app-db";
-import { getActiveSession } from "@/lib/auth";
+import { getActiveSession } from "@/features/auth/auth";
 
 type GamificationHandlerOptions = {
   now?: () => Date;

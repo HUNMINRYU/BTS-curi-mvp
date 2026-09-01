@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 
 import type { AppDatabase, AppUser, GamificationSummary } from "@curi/db";
 import { getAppDatabase } from "@/lib/app-db";
-import { SESSION_COOKIE_NAME } from "@/lib/auth";
+import { SESSION_COOKIE_NAME } from "@/features/auth/auth";
 import { AppTopbarClient } from "./app-topbar-client";
 
 export type AppTopbarState = {

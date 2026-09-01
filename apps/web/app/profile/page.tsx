@@ -6,7 +6,7 @@ import { AbilityDashboard } from "@/components/ability-dashboard";
 import { OnboardingWizard } from "@/components/onboarding-wizard";
 import { StudentRankingPanel } from "@/components/student-ranking";
 import { getAppDatabase } from "@/lib/app-db";
-import { SESSION_COOKIE_NAME } from "@/lib/auth";
+import { SESSION_COOKIE_NAME } from "@/features/auth/auth";
 
 export const dynamic = "force-dynamic";
 

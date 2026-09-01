@@ -33,7 +33,12 @@ test("credential auth stores no plaintext and signup creates a trimmed student a
     const response = await POST(new Request("http://localhost/api/signup", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ username: "new_student", password: "long-enough-password", name: "  새 학생  " }),
+      body: JSON.stringify({
+        username: "new_student",
+        password: "long-enough-password",
+        name: "  새 학생  ",
+        role: "student",
+      }),
     }));
     assert.equal(response.status, 201);
     assert.deepEqual(await response.json(), { redirectTo: "/onboarding" });
@@ -53,7 +58,12 @@ test("credential auth stores no plaintext and signup creates a trimmed student a
     const duplicate = await POST(new Request("http://localhost/api/signup", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ username: "new_student", password: "another-password", name: "다른 이름" }),
+      body: JSON.stringify({
+        username: "new_student",
+        password: "another-password",
+        name: "다른 이름",
+        role: "student",
+      }),
     }));
     assert.equal(duplicate.status, 409);
     assert.deepEqual(await duplicate.json(), { error: "아이디 또는 비밀번호를 확인해 주세요." });
@@ -62,16 +72,78 @@ test("credential auth stores no plaintext and signup creates a trimmed student a
   }
 });
 
+test("professor signup requires the configured invite code and redirects to the professor report", async () => {
+  const previousInviteCode = process.env.CURI_PROFESSOR_SIGNUP_CODE;
+  process.env.CURI_PROFESSOR_SIGNUP_CODE = "faculty-invite";
+  const database = createAppDatabase(":memory:");
+  const { POST } = createSignupHandlers(database, {
+    createSessionId: () => "professor-signup-session",
+    now: () => startedAt,
+    isProduction: false,
+  });
+
+  try {
+    for (const [username, professorInviteCode] of [
+      ["missing_invite", undefined],
+      ["wrong_invite", "wrong-code"],
+    ] as const) {
+      const response = await POST(new Request("http://localhost/api/signup", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          username,
+          password: "long-enough-password",
+          name: "새 교수",
+          role: "professor",
+          professorInviteCode,
+        }),
+      }));
+      assert.equal(response.status, 403);
+      assert.equal(database.getCredentialByUsername(username), null);
+    }
+
+    const response = await POST(new Request("http://localhost/api/signup", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        username: "new_professor",
+        password: "long-enough-password",
+        name: "  새 교수  ",
+        role: "professor",
+        professorInviteCode: "faculty-invite",
+      }),
+    }));
+    assert.equal(response.status, 201);
+    assert.deepEqual(await response.json(), { redirectTo: "/professor" });
+    assert.equal(
+      response.headers.get("set-cookie"),
+      "curi_session=professor-signup-session; Path=/; Max-Age=86400; HttpOnly; SameSite=Lax",
+    );
+    assert.deepEqual(
+      database.getCredentialByUsername("new_professor")?.user,
+      { id: database.getCredentialByUsername("new_professor")?.user.id, name: "새 교수", role: "professor" },
+    );
+  } finally {
+    database.close();
+    if (previousInviteCode === undefined) {
+      delete process.env.CURI_PROFESSOR_SIGNUP_CODE;
+    } else {
+      process.env.CURI_PROFESSOR_SIGNUP_CODE = previousInviteCode;
+    }
+  }
+});
+
 test("signup validates username, password, display name, and rejects legacy user IDs", async () => {
   const database = createAppDatabase(":memory:");
   const { POST } = createSignupHandlers(database, { isProduction: false });
   try {
     for (const body of [
-      { username: "ABC_user", password: "long-enough-password", name: "이름" },
-      { username: "abc", password: "long-enough-password", name: "이름" },
-      { username: "valid_user", password: "short", name: "이름" },
-      { username: "valid_user", password: "long-enough-password", name: "   " },
-      { username: "valid_user", password: "long-enough-password", name: "이름", userId: "legacy-user-id" },
+      { username: "ABC_user", password: "long-enough-password", name: "이름", role: "student" },
+      { username: "abc", password: "long-enough-password", name: "이름", role: "student" },
+      { username: "valid_user", password: "short", name: "이름", role: "student" },
+      { username: "valid_user", password: "long-enough-password", name: "   ", role: "student" },
+      { username: "valid_user", password: "long-enough-password", name: "이름", role: "admin" },
+      { username: "valid_user", password: "long-enough-password", name: "이름", role: "student", userId: "legacy-user-id" },
     ]) {
       const response = await POST(new Request("http://localhost/api/signup", {
         method: "POST",

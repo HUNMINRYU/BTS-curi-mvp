@@ -1,7 +1,7 @@
 import type { ActiveSession, AppDatabase } from "@curi/db";
 
 import { getAppDatabase } from "@/lib/app-db";
-import { getActiveSession } from "@/lib/auth";
+import { getActiveSession } from "@/features/auth/auth";
 import { validateProfileInput } from "@/lib/profile-options";
 
 type ProfileHandlerOptions = {

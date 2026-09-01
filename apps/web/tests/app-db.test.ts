@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { getAppDatabase } from "../lib/app-db";
-import { verifyPassword } from "../lib/auth";
+import { verifyPassword } from "../features/auth/auth";
 
 test("app database seeds configured credential accounts once with hash and salt only", () => {
   const previousPath = process.env.CURI_APP_DB_PATH;

@@ -1,7 +1,7 @@
 import type { ActiveSession, AppDatabase } from "@curi/db";
 
 import { getAppDatabase } from "@/lib/app-db";
-import { getActiveSession } from "@/lib/auth";
+import { getActiveSession } from "@/features/auth/auth";
 
 const UNAUTHORIZED_ERROR = "로그인이 필요합니다.";
 const FORBIDDEN_ERROR = "학생 계정만 준비왕 랭킹을 확인할 수 있습니다.";

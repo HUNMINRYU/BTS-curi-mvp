@@ -2,7 +2,7 @@ import { join } from "node:path";
 
 import { createAppDatabase, type AppDatabase, type UserRole } from "@curi/db";
 
-import { hashPassword } from "./auth";
+import { hashPassword } from "@/features/auth/auth";
 
 let database: AppDatabase | undefined;
 

@@ -9,7 +9,7 @@ import {
   sessionCookie,
   sessionExpiresAt,
   verifyPassword,
-} from "@/lib/auth";
+} from "@/features/auth/auth";
 
 type SessionHandlerOptions = {
   createSessionId?: () => string;

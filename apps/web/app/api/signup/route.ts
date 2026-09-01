@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { randomUUID, timingSafeEqual } from "node:crypto";
 import type { AppDatabase, CredentialUserInput } from "@curi/db";
 import { DuplicateUsernameError } from "@curi/db";
 
@@ -8,13 +8,14 @@ import {
   hashPassword,
   sessionCookie,
   sessionExpiresAt,
-} from "@/lib/auth";
+} from "@/features/auth/auth";
 
 type SignupHandlerOptions = {
   createSessionId?: () => string;
   isProduction?: boolean;
   allowInsecureHttp?: boolean;
   now?: () => Date;
+  professorInviteCode?: string;
 };
 
 export type SignupHandlers = {
@@ -26,13 +27,28 @@ const USERNAME_PATTERN = /^[a-z0-9_]{4,20}$/;
 const PASSWORD_MIN_LENGTH = 10;
 const PASSWORD_MAX_LENGTH = 72;
 const NAME_MAX_LENGTH = 30;
+const INVITE_CODE_MAX_LENGTH = 128;
 
-function isSignupInput(value: unknown): value is { username: string; password: string; name: string } {
+type SignupInput = {
+  readonly username: string;
+  readonly password: string;
+  readonly name: string;
+  readonly role: "student" | "professor";
+  readonly professorInviteCode?: string;
+};
+
+function isSignupInput(value: unknown): value is SignupInput {
   if (typeof value !== "object" || value === null
-    || !("username" in value) || !("password" in value) || !("name" in value)) {
+    || !("username" in value) || !("password" in value) || !("name" in value) || !("role" in value)) {
     return false;
   }
-  if (Object.keys(value).some((key) => key !== "username" && key !== "password" && key !== "name")) {
+  if (Object.keys(value).some((key) => ![
+    "username",
+    "password",
+    "name",
+    "role",
+    "professorInviteCode",
+  ].includes(key))) {
     return false;
   }
   return typeof value.username === "string"
@@ -42,7 +58,19 @@ function isSignupInput(value: unknown): value is { username: string; password: s
     && value.password.length <= PASSWORD_MAX_LENGTH
     && typeof value.name === "string"
     && value.name.trim().length > 0
-    && value.name.trim().length <= NAME_MAX_LENGTH;
+    && value.name.trim().length <= NAME_MAX_LENGTH
+    && (value.role === "student" || value.role === "professor")
+    && (!("professorInviteCode" in value)
+      || (typeof value.professorInviteCode === "string"
+        && value.professorInviteCode.length <= INVITE_CODE_MAX_LENGTH));
+}
+
+function matchesInviteCode(candidate: string | undefined, expected: string | undefined): boolean {
+  if (!candidate || !expected) return false;
+  const candidateBytes = Buffer.from(candidate);
+  const expectedBytes = Buffer.from(expected);
+  return candidateBytes.length === expectedBytes.length
+    && timingSafeEqual(candidateBytes, expectedBytes);
 }
 
 export function createSignupHandlers(
@@ -55,6 +83,8 @@ export function createSignupHandlers(
     ?? process.env.CURI_ALLOW_INSECURE_HTTP === "true";
   const isProduction = (options.isProduction ?? process.env.NODE_ENV === "production")
     && !allowInsecureHttp;
+  const professorInviteCode = options.professorInviteCode
+    ?? process.env.CURI_PROFESSOR_SIGNUP_CODE;
 
   async function POST(request: Request): Promise<Response> {
     let body: unknown;
@@ -66,13 +96,17 @@ export function createSignupHandlers(
     if (!isSignupInput(body)) {
       return Response.json({ error: INVALID_SIGNUP_ERROR }, { status: 400 });
     }
+    if (body.role === "professor"
+      && !matchesInviteCode(body.professorInviteCode?.trim(), professorInviteCode?.trim())) {
+      return Response.json({ error: INVALID_SIGNUP_ERROR }, { status: 403 });
+    }
 
     const { passwordHash, passwordSalt } = hashPassword(body.password);
     const input: CredentialUserInput = {
       id: randomUUID(),
       username: body.username,
       name: body.name.trim(),
-      role: "student",
+      role: body.role,
       passwordHash,
       passwordSalt,
     };
@@ -93,7 +127,7 @@ export function createSignupHandlers(
       expiresAt: sessionExpiresAt(now()),
     });
     return Response.json(
-      { redirectTo: "/onboarding" },
+      { redirectTo: body.role === "professor" ? "/professor" : "/onboarding" },
       { status: 201, headers: { "set-cookie": sessionCookie(sessionId, isProduction) } },
     );
   }

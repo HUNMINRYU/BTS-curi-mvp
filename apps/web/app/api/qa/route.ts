@@ -2,7 +2,7 @@ import type { ActiveSession, AppDatabase } from "@curi/db";
 
 import { answerWithBedrock } from "@/lib/bedrock";
 import { getAppDatabase } from "@/lib/app-db";
-import { getActiveSession } from "@/lib/auth";
+import { getActiveSession } from "@/features/auth/auth";
 import { getCatalogCourse } from "@/lib/catalog-data";
 import {
   createKnowledgeBaseRetriever,

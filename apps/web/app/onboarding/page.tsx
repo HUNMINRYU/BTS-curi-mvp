@@ -5,7 +5,7 @@ import type { ActiveSession, UserProfile } from "@curi/db";
 import { CuriReward } from "@/components/curi-reward";
 import { OnboardingWizard } from "@/components/onboarding-wizard";
 import { getAppDatabase } from "@/lib/app-db";
-import { SESSION_COOKIE_NAME } from "@/lib/auth";
+import { SESSION_COOKIE_NAME } from "@/features/auth/auth";
 
 type OnboardingSession = Pick<ActiveSession, "user"> | null;
 type OnboardingProfile = Pick<UserProfile, "completedAt"> | null;

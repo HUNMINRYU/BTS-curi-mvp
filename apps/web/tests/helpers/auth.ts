@@ -1,6 +1,6 @@
 import type { AppDatabase, CredentialUserInput, UserRole } from "@curi/db";
 
-import { hashPassword } from "../../lib/auth";
+import { hashPassword } from "../../features/auth/auth";
 
 export const TEST_PASSWORD = "correct-password";
 

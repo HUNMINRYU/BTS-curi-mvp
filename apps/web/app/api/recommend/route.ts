@@ -1,7 +1,7 @@
 import type { ActiveSession, AppDatabase } from "@curi/db";
 
 import { getAppDatabase } from "@/lib/app-db";
-import { getActiveSession } from "@/lib/auth";
+import { getActiveSession } from "@/features/auth/auth";
 import { getCatalog, type CatalogCourse } from "@/lib/catalog-data";
 import { generateRecommendationReasons } from "@/lib/recommend-bedrock";
 import {
