@@ -1,0 +1,28 @@
+# Secrets and credentials
+*.pem
+조1_광주대.zip
+광주대 * 강의계획서.zip
+.env
+.env.*
+!.env.example
+
+# Python example artifacts
+__pycache__/
+*.py[cod]
+.venv/
+faiss_index/
+downloaded_context.txt
+
+# Node and Next.js
+node_modules/
+.next/
+out/
+coverage/
+
+# Local data and logs
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+*.log
+.DS_Store
