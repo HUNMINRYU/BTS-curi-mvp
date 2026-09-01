@@ -89,9 +89,18 @@ jobs:
           pnpm run build
 
           ln -sfn "$RELEASE" "$root/current"
-          if ! sudo systemctl restart curi \
-            || ! curl --fail --silent --show-error --max-time 30 \
-              http://127.0.0.1:3000/login >/dev/null; then
+          healthy=0
+          if sudo systemctl restart curi; then
+            for attempt in $(seq 1 30); do
+              if curl --fail --silent --show-error --max-time 2 \
+                http://127.0.0.1:3000/login >/dev/null; then
+                healthy=1
+                break
+              fi
+              sleep 1
+            done
+          fi
+          if [ "$healthy" -ne 1 ]; then
             if [ -n "$previous" ]; then
               ln -sfn "$previous" "$root/current"
               sudo systemctl restart curi
