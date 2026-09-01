@@ -24,3 +24,10 @@ export {
   type UserCourseTipAwardInput,
 } from "./database";
 export { APP_DATABASE_SCHEMA, COURSE_TIPS_SCHEMA } from "./schema";
+export {
+  type AnonymousClassInsights,
+  type AnonymousClassStatus,
+  type ProfileDistribution,
+  type RankingEntry,
+  type StudentRanking,
+} from "./reports";

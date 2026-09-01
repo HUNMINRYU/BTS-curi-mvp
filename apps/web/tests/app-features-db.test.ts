@@ -109,3 +109,88 @@ test("학생 세션 준비 헬퍼는 API 테스트에 쓸 수 있다", () => {
     database.close();
   }
 });
+
+test("준비왕 랭킹은 포인트순·동점 ID순이며 현재 학생 순위를 표시한다", () => {
+  const database = createAppDatabase(":memory:");
+  try {
+    for (const [id, name] of [
+      ["student-a", "가나다"],
+      ["student-b", "나학생"],
+      ["student-c", "다학생"],
+      ["student-d", "라학생"],
+      ["student-e", "마학생"],
+      ["student-f", "바학생"],
+    ] as const) {
+      createCredentialTestUser(database, { id, name, role: "student" });
+    }
+    database.awardOnboarding("student-a", now.toISOString());
+    database.awardOnboarding("student-b", now.toISOString());
+    database.awardQaQuestion("student-b", "질문", now.toISOString());
+    database.awardOnboarding("student-c", now.toISOString());
+    database.awardQaQuestion("student-c", "질문", now.toISOString());
+    database.awardOnboarding("student-d", now.toISOString());
+    database.awardOnboarding("student-e", now.toISOString());
+    database.awardOnboarding("student-f", now.toISOString());
+
+    assert.deepEqual(database.getStudentRanking("student-f"), {
+      leaders: [
+        { rank: 1, displayName: "나**", totalPoints: 35, isMe: false },
+        { rank: 2, displayName: "다**", totalPoints: 35, isMe: false },
+        { rank: 3, displayName: "가**", totalPoints: 30, isMe: false },
+        { rank: 4, displayName: "라**", totalPoints: 30, isMe: false },
+        { rank: 5, displayName: "마**", totalPoints: 30, isMe: false },
+      ],
+      me: { rank: 6, displayName: "바**", totalPoints: 30, isMe: true },
+    });
+  } finally {
+    database.close();
+  }
+});
+
+test("교수용 학급 현황과 TMI는 학생 식별정보 없이 집계한다", () => {
+  const database = createAppDatabase(":memory:");
+  try {
+    for (const [index, interest] of ["웹 개발", "웹 개발", "AI", "웹 개발", "AI"].entries()) {
+      const id = `student-${index}`;
+      createCredentialTestUser(database, { id, name: `학생 ${index}`, role: "student" });
+      database.upsertProfile({
+        userId: id,
+        major: "컴퓨터공학과",
+        interest,
+        goal: index < 3 ? "포트폴리오" : "취업",
+        career: "프론트엔드 개발자",
+        style: index < 4 ? "직접 해보기" : "강의 듣기",
+        hours: index < 2 ? "주 5시간" : "주 3시간",
+        avoid: null,
+        completedAt: now.toISOString(),
+      });
+      database.awardOnboarding(id, now.toISOString());
+    }
+    createCredentialTestUser(database, { id: "student-incomplete", name: "미완료 학생", role: "student" });
+    createCredentialTestUser(database, { id: "professor-test", name: "테스트 교수", role: "professor" });
+    database.setChecklistItem("student-0", "web-content-development", "vscode", true);
+
+    assert.deepEqual(database.getAnonymousClassInsights(), {
+      status: {
+        studentCount: 6,
+        onboardingCount: 5,
+        totalPoints: 150,
+        averagePoints: 25,
+        badgeCount: 5,
+        checklistCompletionCount: 1,
+      },
+      tmi: {
+        profileCount: 5,
+        visible: true,
+        topValues: [
+          { field: "interest", label: "관심분야", value: "웹 개발", count: 3 },
+          { field: "goal", label: "학습 목표", value: "포트폴리오", count: 3 },
+          { field: "style", label: "학습 스타일", value: "직접 해보기", count: 4 },
+          { field: "hours", label: "주간 학습 시간", value: "주 3시간", count: 3 },
+        ],
+      },
+    });
+  } finally {
+    database.close();
+  }
+});

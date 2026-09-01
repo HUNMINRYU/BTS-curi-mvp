@@ -5,6 +5,11 @@ import { dirname } from "node:path";
 import Database from "better-sqlite3";
 
 import { APP_DATABASE_SCHEMA, COURSE_TIPS_SCHEMA } from "./schema";
+import {
+  createReportQueries,
+  type AnonymousClassInsights,
+  type StudentRanking,
+} from "./reports";
 
 export type NewCourseTip = {
   courseId: string;
@@ -275,6 +280,8 @@ export type AppDatabase = {
   awardQaQuestion(userId: string, question: string, awardedAt: string): GamificationSummary;
   getGamificationSummary(userId: string): GamificationSummary;
   listGamificationEventKeys(userId: string): string[];
+  getStudentRanking(userId: string): StudentRanking;
+  getAnonymousClassInsights(): AnonymousClassInsights;
   insertQaLog(courseId: string, question: string, createdAt: string): void;
   listQaLogSummary(): QaLogSummary[];
   listCourseTips(courseId: string): AppCourseTip[];
@@ -432,6 +439,7 @@ export function createAppDatabase(filename: string): AppDatabase {
   database.pragma("foreign_keys = ON");
   database.pragma("journal_mode = WAL");
   database.exec(APP_DATABASE_SCHEMA);
+  const reportQueries = createReportQueries(database);
 
   const createUserStatement = database.prepare(`
     INSERT INTO users (id, name, role) VALUES (@id, @name, @role)
@@ -792,6 +800,8 @@ export function createAppDatabase(filename: string): AppDatabase {
     },
     getGamificationSummary,
     listGamificationEventKeys,
+    getStudentRanking: reportQueries.getStudentRanking,
+    getAnonymousClassInsights: reportQueries.getAnonymousClassInsights,
     insertQaLog(courseId, question, createdAt) {
       insertQaLogStatement.run({ courseId, question, createdAt });
     },
