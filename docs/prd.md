@@ -20,7 +20,7 @@ CURI는 학생의 전공·관심·목표·학습 방식을 이해해 과목과 �
 - 교수: 읽기 전용 리포트에서 근거 없음 질문과 팁 집계를 확인한다.
 - 심사위원: 사전 생성된 학생·교수 데모 계정을 전환해 전체 동선을 확인한다.
 
-회원가입·비밀번호·이메일 인증·계정 관리는 제공하지 않는다.
+비밀번호 재설정·이메일 인증·고급 계정 관리는 제공하지 않는다.
 
 ## 4. 정보 계층
 
@@ -54,7 +54,7 @@ CURI는 학생의 전공·관심·목표·학습 방식을 이해해 과목과 �
 - 근거가 있으면 Bedrock `global.anthropic.claude-sonnet-5`에 근거만 전달한다.
 - 모델 실패는 `model_error`와 근거 목록을 유지한다.
 - 수강생 팁은 답변 근거에 포함하지 않는다.
-- **계획됨(배포 미연결):** S3 `documents/` PDF에서 로컬 인덱스를 재생성하려면 `scripts/rag_indexer.py`를 수동으로 실행한다.
+- build-time source/provenance는 비공개(private)·versioned S3 bucket `hackathon-e2-t01-curi-docs`의 `documents/`다. S3 Public Access Block의 `BlockPublicAcls`, `IgnorePublicAcls`, `BlockPublicPolicy`, `RestrictPublicBuckets`는 모두 `true`이고, 기본 서버 측 암호화는 `AES256`, versioning 상태는 `Enabled`다. Sanitized PDF 77개와 metadata sidecar 77개를 `scripts/rag_indexer.py`가 읽어 Titan Text Embeddings v2 512-dimensional local bundle을 만든다. 현재 bundle은 458 vectors와 77 courses다. production query runtime은 S3를 읽지 않고 local FAISS를 조회한다.
 
 ### FR-4 수강생 학습 팁 집계
 - 초기 데모 응답 12건의 응답 수, 세 평균, 태그 빈도를 표시한다.
@@ -94,8 +94,9 @@ CURI는 학생의 전공·관심·목표·학습 방식을 이해해 과목과 �
 - 과목 셀은 링크이며 키보드로 상세에 진입한다.
 
 ### FR-10 로그인과 역할
-- `/login`에서 학생·교수 사전 생성 계정을 선택한다.
+- `/signup`에서 학생·교수 계정을 만들고 `/login`에서 자격증명으로 로그인한다. 사전 생성 데모 계정도 사용할 수 있다.
 - 서버는 추측 불가능한 세션 ID의 HttpOnly·SameSite=Lax 쿠키를 발급하고 SQLite 세션에 연결한다.
+- 교수 가입은 server-only `CURI_PROFESSOR_SIGNUP_CODE`와 요청 코드가 일치할 때만 허용한다. 환경변수가 없거나 비어 있으면 deny-closed HTTP 403이며, 코드 교체 후에는 앱 서비스 프로세스 재시작이 필요하다.
 - 학생은 학생 화면, 교수는 `/professor`로 이동한다.
 - 학생의 교수 화면 접근과 교수의 학생 변경 API 접근은 403 또는 역할별 리다이렉트로 차단한다.
 - 로그아웃은 서버 세션과 쿠키를 제거한다.
@@ -109,13 +110,13 @@ CURI는 학생의 전공·관심·목표·학습 방식을 이해해 과목과 �
 ## 6. 비기능 요구사항
 - Node.js 20.9 이상, pnpm, Next.js App Router + TypeScript 단일 앱.
 - SQLite 파일은 Git에 포함하지 않는다.
-- 현재 배포의 Q&A는 EC2 로컬 FAISS 사이드카와 Bedrock을 사용한다. S3 문서 동기화·재색인은 계획된 수동 절차로 아직 런타임에 연결하지 않았다.
-- 계획된 S3 재색인에서 boto3의 리전·자격 증명은 기본 공급자 체인에서 해석한다. Access Key는 만들거나 저장하지 않는다.
+- 현재 배포의 Q&A는 EC2 로컬 loopback FAISS 사이드카와 Bedrock을 사용한다. 비공개(private)·versioned S3 bucket `hackathon-e2-t01-curi-docs`의 sanitized PDF 77개와 metadata sidecar 77개는 build-time source/provenance이며, 현재 bundle은 458 vectors·77 courses·Titan v2 512 dimensions이다. S3 Public Access Block의 네 플래그는 모두 `true`이고, 기본 서버 측 암호화는 `AES256`, versioning 상태는 `Enabled`다. S3는 production query runtime에서 읽지 않는다.
+- build-time `rag_indexer.py`의 boto3 리전·자격 증명은 기본 공급자 체인에서 해석한다. Access Key는 만들거나 저장하지 않는다.
 - deploy/destroy와 EC2 종료·재시작은 사용자 명시 승인 전 금지한다.
 - 기존 네이비·퍼플 디자인, 학교안심 알림장 폰트, CURI 캐릭터 자산을 유지한다.
 
 ## 7. 제외 범위
-외부 강의평 원문, 자유서술 후기, 교수 평판, 개인 일정 캘린더, 알림, 회원가입, 비밀번호 재설정, 이메일 인증, 모바일 앱, 결제, 실제 성적 평가, 대댓글·신고·차단·금칙어, 업로드 관리자 기능, 관리형 벡터 DB, 학기 전후 능력 그래프와 말투 모드(핵심 완료 전).
+외부 강의평 원문, 자유서술 후기, 교수 평판, 개인 일정 캘린더, 알림, 비밀번호 재설정, 이메일 인증, 모바일 앱, 결제, 실제 성적 평가, 대댓글·신고·차단·금칙어, 업로드 관리자 기능, 관리형 벡터 DB, 학기 전후 능력 그래프와 말투 모드(핵심 완료 전).
 
 ## 8. 완료 기준
 - 핵심 학생·교수 10단계 데모 동선을 로컬 브라우저에서 완료한다.

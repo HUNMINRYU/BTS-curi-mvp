@@ -31,7 +31,7 @@
 | 검증된 동작 | 140개 이상의 자동 테스트 (`apps/web/tests`), CI에서 typecheck → test → build 통과 후 배포 |
 | 접근성 QA | 데스크톱·모바일 반응형, 마우스 없이 키보드만으로 핵심 동선 통과 ([`docs/architecture.md`](docs/architecture.md) 검증 기준) |
 | 생성형 AI 활용 | Amazon Bedrock Claude로 추천 이유·Q&A 답변 생성, Titan Embeddings v2로 질의 임베딩 |
-| 검색 인프라 | EC2 로컬 FAISS sidecar (런타임은 S3 미사용 — 아래 AWS 섹션 참조) |
+| 검색 인프라 | EC2 로컬 loopback FAISS sidecar. 현재 bundle은 458 vectors·77 courses·Titan v2 512 dimensions이며, S3는 build-time source/provenance로만 사용합니다. |
 | 개인정보 보호 | 이메일·전화번호 서버 경계 마스킹, 교수 리포트 완전 익명 |
 | 정직한 실패 | 근거가 없는 질문에는 모델을 호출하지 않고 `근거 없음` 반환 |
 
@@ -64,7 +64,7 @@
 ```text
 apps/web      Next.js 16 · React · TypeScript (앱 + 자동 테스트)
 packages/db   SQLite · better-sqlite3
-scripts       데모 시드 · FAISS sidecar · 계획된 S3 수동 재색인 도구
+scripts       데모 시드 · FAISS sidecar · S3 문서에서 로컬 bundle을 만드는 build-time 도구
 infra         AWS CDK 스캐폴드(현재 실제 배포는 EC2 release 방식)
 docs          PRD · 아키텍처 · 시연 대본 · 발표 자료 · 인수인계
 ```
@@ -73,56 +73,60 @@ docs          PRD · 아키텍처 · 시연 대본 · 발표 자료 · 인수인
 
 ## 사용한 AWS 서비스
 
-현재 배포의 런타임과 계획된 문서 재색인 절차를 구분합니다.
+현재 운영 요청 경로와 build-time 문서 source/provenance 경계를 구분합니다.
 
-| 서비스 | 현재 배포 및 계획 |
+| 서비스 | 현재 운영 및 build-time 역할 |
 | --- | --- |
 | Amazon EC2 (ap-northeast-2) | Next.js 단일 프로세스와 로컬 FAISS 검색 사이드카를 systemd로 실행. 앞단은 nginx |
 | Amazon Bedrock — Claude Sonnet | 추천 이유 생성, 검색 근거 기반 Q&A 답변 생성 |
-| Amazon Bedrock — Titan Text Embeddings v2 | Q&A 질의 임베딩. 계획된 수동 재색인 시 PDF 청크 임베딩에도 사용 |
-| Amazon S3 | **계획됨(현재 배포 미연결):** 준비된 PDF와 sidecar 메타데이터를 `documents/`에 동기화해 수동으로 인덱스를 재생성하는 도구가 저장소에 있다. Q&A 런타임은 S3를 읽지 않는다. |
+| Amazon Bedrock — Titan Text Embeddings v2 | Q&A 질의 임베딩과 build-time PDF 청크 임베딩. 현재 bundle은 512 dimensions를 사용 |
+| Amazon S3 | **비공개(private)·versioned bucket `hackathon-e2-t01-curi-docs`:** S3 Public Access Block의 `BlockPublicAcls`, `IgnorePublicAcls`, `BlockPublicPolicy`, `RestrictPublicBuckets` 네 플래그가 모두 `true`이고, 기본 서버 측 암호화는 `AES256`, versioning 상태는 `Enabled`입니다. `documents/` 아래 sanitized PDF 77개와 metadata sidecar 77개를 보관합니다. build-time bundle의 source/provenance이며, production Q&A는 S3를 읽지 않고 로컬 FAISS를 조회합니다. |
 
 사용자·세션·프로필·시간표·체크리스트·팁·Q&A 로그·포인트는 EC2 로컬 SQLite 단일 파일에 저장합니다.
 
-## RAG 문서 색인 현황과 계획된 수동 재구축
+## RAG 문서 원본과 현재 bundle
 
-현재 배포의 `curi-rag.service`는 `/var/lib/curi/rag/index.faiss`와 `chunks.jsonl`만 읽습니다. 웹 앱은 loopback retriever에 요청하고, sidecar는 로컬 파일과 Bedrock Runtime만 사용합니다. 런타임은 S3를 조회하지 않으며 `CURI_DOCUMENT_BUCKET`도 읽지 않습니다. 저장소만으로는 배포되어 있는 인덱스가 어느 입력 경로에서 만들어졌는지 확인할 수 없습니다.
+검증된 build-time source/provenance는 비공개(private)·versioned·AES256 암호화·public access blocked S3 bucket `hackathon-e2-t01-curi-docs`의 `documents/` prefix입니다. 이 prefix에는 개인정보를 제거한 sanitized PDF 77개와 PDF별 metadata sidecar 77개가 있습니다. 현재 production bundle은 458 vectors, 77 courses, Titan Text Embeddings v2 512 dimensions로 구성됩니다.
 
-`CURI_DOCUMENT_BUCKET`은 계획된 수동 재구축에서만 `scripts/upload-rag-documents.sh`와 `scripts/rag_indexer.py`가 읽습니다. `scripts/prepare-rag-documents.mjs`는 로컬 ZIP 경로를 받아 Git 밖 staging에 `documents/` 트리를 만들 뿐, 로컬 인덱스를 만들지 않습니다.
+build-time `scripts/rag_indexer.py`는 `CURI_DOCUMENT_BUCKET`의 `documents/`에서 PDF와 `{pdf}.metadata.json` sidecar를 읽고, Titan v2 512-dimensional embeddings로 로컬 `index.faiss`와 `chunks.jsonl`을 생성합니다. production 요청에서는 `scripts/rag_sidecar.py`가 로컬 FAISS와 chunks 파일만 읽고 질의 임베딩을 위해 Bedrock Runtime만 호출합니다. 따라서 S3는 source/provenance와 build-time 입력이고, production query runtime은 S3를 읽지 않습니다.
 
-### 로컬 원본 ZIP 준비
+### Build-time source staging
 
-아래 명령은 로컬 원본 ZIP을 준비할 때의 정확한 입력 변수입니다. staging 경로는 저장소 밖이어야 합니다.
+아래 명령은 로컬 원본 ZIP에서 sanitized PDF와 sidecar를 준비할 때의 입력 변수입니다. staging 경로는 저장소 밖이어야 합니다.
 
 ```bash
-CURI_RAG_STAGING_DIR="/absolute/path/curi-rag-documents" \
-CURI_LIBERAL_ARTS_ZIP="/absolute/path/교양 - 이러닝.zip" \
-CURI_ARCHITECTURE_ZIP="/absolute/path/광주대 건축학과 강의계획서.zip" \
-CURI_COMPUTER_ENGINEERING_ZIP="/absolute/path/광주대 컴퓨터공학과 강의계획서.zip" \
-CURI_ACCOUNTING_TAX_ZIP="/absolute/path/광주대 회계세무학과 강의계획서.zip" \
+CURI_RAG_STAGING_DIR="<staging-dir-outside-repository>" \
+CURI_LIBERAL_ARTS_ZIP="<liberal-arts-source-zip>" \
+CURI_ARCHITECTURE_ZIP="<architecture-source-zip>" \
+CURI_COMPUTER_ENGINEERING_ZIP="<computer-engineering-source-zip>" \
+CURI_ACCOUNTING_TAX_ZIP="<accounting-tax-source-zip>" \
 node scripts/prepare-rag-documents.mjs
 ```
 
-### 계획된 S3 수동 재색인
+### Build-time S3 index build
 
-이 절차는 현재 배포에 연결되어 있지 않습니다. S3 원본 위치와 권한을 AWS 콘솔에서 확인한 뒤에만 사용할 수 있습니다.
+아래 절차는 source/provenance를 로컬 production bundle로 만드는 build-time 작업입니다. production 요청 처리 중에는 실행하지 않으며, 완성된 bundle을 production의 로컬 FAISS 경로에 배포합니다.
 
 ```bash
-CURI_DOCUMENT_BUCKET="<bucket>" \
-CURI_RAG_STAGING_DIR="/absolute/path/curi-rag-documents" \
+CURI_DOCUMENT_BUCKET="hackathon-e2-t01-curi-docs" \
+CURI_RAG_STAGING_DIR="<staging-dir-outside-repository>" \
 bash scripts/upload-rag-documents.sh
 
 python3 -m pip install -r scripts/requirements-rag.txt
 
 AWS_DEFAULT_REGION="<region>" \
-CURI_DOCUMENT_BUCKET="<bucket>" \
+CURI_DOCUMENT_BUCKET="hackathon-e2-t01-curi-docs" \
 CURI_DOCUMENT_PREFIX="documents/" \
-CURI_RAG_INDEX_PATH="/var/lib/curi/rag/index.faiss" \
-CURI_RAG_CHUNKS_PATH="/var/lib/curi/rag/chunks.jsonl" \
+CURI_RAG_INDEX_PATH="<local-bundle-dir>/index.faiss" \
+CURI_RAG_CHUNKS_PATH="<local-bundle-dir>/chunks.jsonl" \
 python3 scripts/rag_indexer.py
 ```
 
-`CURI_DOCUMENT_BUCKET`은 인덱서의 필수 CURI 변수이고, `CURI_DOCUMENT_PREFIX`, `CURI_RAG_INDEX_PATH`, `CURI_RAG_CHUNKS_PATH`는 위 명령에서 명시한 선택 변수입니다. 인덱서는 로컬 PDF 경로를 받지 않으며 S3 `documents/`에서 PDF와 `{pdf}.metadata.json`을 읽습니다. `AWS_DEFAULT_REGION`과 AWS 자격 증명은 boto3 기본 공급자 체인에서 해석되어야 하며, 정확한 값·권한은 저장소에서 알 수 없습니다.
+`CURI_DOCUMENT_BUCKET`은 인덱서의 필수 CURI 변수이고, `CURI_DOCUMENT_PREFIX`, `CURI_RAG_INDEX_PATH`, `CURI_RAG_CHUNKS_PATH`는 선택 변수입니다. 인덱서는 로컬 PDF 경로를 받지 않으며 S3 `documents/`에서 PDF와 `{pdf}.metadata.json`을 읽습니다. `AWS_DEFAULT_REGION`과 AWS 자격 증명은 boto3 기본 공급자 체인에서 해석되며, 값은 저장소에 두지 않습니다.
+
+### 교수 가입 코드 운영
+
+`/api/signup`의 교수 가입은 server-only 환경변수 `CURI_PROFESSOR_SIGNUP_CODE`와 요청의 `professorInviteCode`를 비교합니다. 환경변수가 없거나 비어 있으면 deny-closed로 교수 가입을 닫고 HTTP 403을 반환합니다. 기대하는 코드는 브라우저나 저장소에 노출하지 않으며, 코드를 교체한 뒤에는 앱 서비스 프로세스를 재시작해야 새 설정이 적용됩니다.
 
 ## 빠른 시작
 

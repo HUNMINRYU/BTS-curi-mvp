@@ -9,30 +9,30 @@
 **결정:** 개인정보 제거 실제 파생 데이터와 표시된 가상 보충 데이터를 함께 사용한다. 실제 파생 레코드는 `actual`, 팀 생성 데이터는 `demo`를 갖는다.
 
 ## D-3 애플리케이션 구조
-**현황(현재 배포):** Next.js App Router 모노리스와 Python `rag_sidecar.py` FAISS 검색 사이드카를 EC2에서 함께 실행한다. 기존 Streamlit 프로토타입은 제품에 포함하지 않는다. `rag_indexer.py`는 현재 사이드카 서비스가 호출하지 않는 계획된 수동 재색인 도구다.
+**현황(현재 배포):** Next.js App Router 모노리스와 Python `rag_sidecar.py` FAISS 검색 사이드카를 EC2에서 함께 실행한다. 기존 Streamlit 프로토타입은 제품에 포함하지 않는다. `rag_indexer.py`는 비공개 S3 source/provenance를 production용 로컬 bundle로 만드는 build-time 도구이며, production sidecar가 직접 호출하지는 않는다.
 
 ## D-4 데이터베이스
 **결정:** 로컬과 EC2 모두 SQLite 파일을 사용한다.
 
 ## D-5 인증 (2026-09-01 개정)
-**결정:** 학생·교수 역할을 구분하는 로그인을 구현한다. 사전 생성된 데모 계정 2개와 HttpOnly 세션 쿠키만 사용한다.
+**결정:** 학생·교수 역할을 구분하는 로그인과 `/signup` 계정 생성을 구현한다. 비밀번호는 서버에서 scrypt 해시로 저장하고 HttpOnly 세션 쿠키를 사용한다. 교수 가입은 server-only `CURI_PROFESSOR_SIGNUP_CODE`와 요청 코드가 일치할 때만 허용한다.
 
-**제외:** 회원가입, 비밀번호, 비밀번호 재설정, 이메일 인증, Cognito, 고급 권한 관리.
+**운영 경계:** `CURI_PROFESSOR_SIGNUP_CODE`가 없거나 비어 있으면 교수 가입은 deny-closed로 HTTP 403을 반환한다. 기대하는 값은 브라우저·저장소에 넣지 않으며, 값을 교체한 뒤에는 앱 서비스 프로세스를 재시작해야 한다. 비밀번호 재설정·이메일 인증·Cognito·고급 권한 관리는 제외한다.
 
 ## D-6 RAG 검색 (배포 현황 정정)
-**현황(현재 배포):** Q&A는 `/var/lib/curi/rag/index.faiss`와 `chunks.jsonl`의 사전 생성 로컬 인덱스를 loopback retriever로 검색한다. 요청 `courseId`와 정확히 같은 청크만 반환하며, sidecar는 질의 임베딩을 위해 Bedrock Runtime만 호출한다. 런타임은 S3를 읽지 않고 `CURI_DOCUMENT_BUCKET`도 사용하지 않는다.
+**현황(현재 배포):** Q&A는 사전 생성된 EC2-local `index.faiss`·`chunks.jsonl` bundle을 loopback retriever로 검색한다. 현재 bundle은 458 vectors, 77 courses, Titan Text Embeddings v2 512 dimensions다. 요청 `courseId`와 정확히 같은 청크만 반환하며, production sidecar는 질의 임베딩을 위해 Bedrock Runtime만 호출한다.
 
-**계획됨(배포 미연결):** `scripts/rag_indexer.py`는 `CURI_DOCUMENT_BUCKET`의 `documents/` PDF와 sidecar 메타데이터를 읽어 같은 로컬 FAISS 인덱스를 수동 재생성할 수 있다. Bedrock Knowledge Base, `CreateKnowledgeBase`, S3 Vectors, 별도 관리형 벡터 DB는 사용하지 않는다.
+**build-time source/provenance:** 비공개 versioned bucket `hackathon-e2-t01-curi-docs`의 `documents/` 아래 sanitized PDF 77개와 metadata sidecar 77개를 `scripts/rag_indexer.py`가 읽어 로컬 FAISS bundle을 만든다. production runtime은 S3를 읽지 않고 `CURI_DOCUMENT_BUCKET`도 사용하지 않는다. Bedrock Knowledge Base, `CreateKnowledgeBase`, S3 Vectors, 별도 관리형 벡터 DB는 사용하지 않는다.
 
-**근거:** `rag_sidecar.py`는 `faiss.read_index`와 로컬 `chunks.jsonl`을 읽고 `boto3.client("bedrock-runtime")`만 만든다. S3 클라이언트와 `CURI_DOCUMENT_BUCKET` 읽기는 `rag_indexer.py`에만 있다. 저장소는 현재 배포 인덱스의 입력 경로를 기록하지 않는다.
+**근거:** `rag_sidecar.py`는 `faiss.read_index`와 로컬 `chunks.jsonl`을 읽고 `boto3.client("bedrock-runtime")`만 만든다. S3 client와 `CURI_DOCUMENT_BUCKET` 읽기는 `rag_indexer.py`의 build-time 경로에만 있다.
 
 ## D-7 생성 모델
 **결정:** `global.anthropic.claude-sonnet-5`를 Amazon Bedrock에서 호출한다. 리전은 SDK 기본 공급자 체인에서 상속한다. 근거가 없으면 모델을 호출하지 않는다.
 
-## D-8 S3 (배포 현황 정정)
-**현황(현재 배포):** 문서 S3 버킷은 런타임 구성에 연결되어 있지 않다. 서버 환경에 `CURI_DOCUMENT_BUCKET`이 없고, 현재 Q&A는 로컬 인덱스만 읽는다. 저장소 코드에는 실제 운영 버킷명이나 배포 인덱스의 입력 경로가 없다.
+## D-8 S3 source/provenance
+**결정:** 문서 S3 bucket은 비공개(private)·versioned `hackathon-e2-t01-curi-docs`다. S3 Public Access Block의 `BlockPublicAcls`, `IgnorePublicAcls`, `BlockPublicPolicy`, `RestrictPublicBuckets`는 모두 `true`이고, 기본 서버 측 암호화는 `AES256`, versioning 상태는 `Enabled`다. `documents/` 아래 sanitized PDF 77개와 metadata sidecar 77개가 build-time source/provenance로 존재하며, 현재 bundle은 458 vectors·77 courses·Titan v2 512 dimensions다.
 
-**계획됨(배포 미연결):** Git 밖 staging에서 준비한 PDF와 sidecar 메타데이터를 비공개 `documents/` 접두사에 `scripts/upload-rag-documents.sh`로 동기화한 뒤, `scripts/rag_indexer.py`를 별도로 실행한다. 원본 ZIP은 업로드하지 않으며, 업로드 스크립트는 `aws s3 sync`에 `--delete`를 전달하지 않는다.
+**운영 경계:** build-time `scripts/rag_indexer.py`는 S3 문서와 sidecar를 읽어 로컬 FAISS bundle을 만든다. production Q&A는 `rag_sidecar.py`가 로컬 bundle을 조회하므로 S3를 요청마다 읽지 않는다. 원본 ZIP은 Git에 넣지 않으며, source 문서와 자격 증명 값도 저장소에 두지 않는다.
 
 ## D-9 수강생 팁
 **결정:** 3단계 척도 3개와 선택형 준비 태그만 수집하고, 과목별 5건부터 집계를 공개한다. 자유서술과 IP를 저장하지 않는다.
