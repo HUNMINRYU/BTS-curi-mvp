@@ -372,13 +372,13 @@ h1 em { color: #b99cf0; font-style: normal; }
   overflow: auto;
   overscroll-behavior: contain;
   scroll-padding-block: 1rem;
-  padding: 1.2rem;
+  padding: 0 1.2rem 1.2rem;
   border: 1px solid var(--purple-line);
   border-radius: 1.25rem;
   background: var(--card);
   box-shadow: var(--shadow-strong);
 }
-.chatbot-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; position: sticky; top: 0; z-index: 1; padding-bottom: 0.75rem; background: var(--card); }
+.chatbot-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; position: sticky; top: 0; z-index: 1; padding: 1.2rem 0 0.75rem; background: var(--card); }
 .chatbot-header h2 { margin: 0; font-size: 1.3rem; letter-spacing: -0.03em; }
 .chatbot-close {
   width: 2.5rem;
