@@ -671,7 +671,7 @@ h1 em { color: #b99cf0; font-style: normal; }
 .student-page .curi-reward strong { font-size: 1.1rem; line-height: 1; }
 .student-page .curi-reward small { font-size: 0.7rem; }
 .student-page .reward-progress { height: 0.32rem; }
-.student-signup-cta { width: fit-content; margin-top: 1.25rem; text-decoration: none; }
+.student-signup-cta { width: fit-content; display: inline-flex; align-items: center; justify-content: center; margin-top: 1.25rem; text-decoration: none; }
 .student-signup-cta:hover { background: var(--purple-bright); }
 .student-page-content {
   width: min(100%, 76rem);
