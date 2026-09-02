@@ -126,7 +126,7 @@ export function QaPanel({ courseId }: { courseId: string }) {
                 id="course-question"
                 maxLength={200}
                 onChange={(event) => setQuestion(event.target.value)}
-                placeholder="예: 실습 전에 무엇을 준비해야 하나요?"
+                placeholder="예: 중간고사 평가 비중이 어떻게 되나요?"
                 value={question}
               />
               <button disabled={pending || question.trim().length === 0} type="submit">
