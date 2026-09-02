@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 import { CuriMascot } from "@/components/curi-mascot";
 import type { CatalogCourse } from "@/features/catalog/catalog-data";
+import { courseGridLanes } from "@/features/timetable/course-schedule";
 
 const DAYS = ["월", "화", "수", "목", "금", "토", "일"] as const;
 const PERIODS = Array.from({ length: 15 }, (_, index) => index + 1);
@@ -171,6 +172,7 @@ export function Timetable({ initialCourses }: TimetableProps) {
         const scheduledCourses = courses.filter(hasSchedule);
         const unscheduledCourses = courses.filter((course) => !hasSchedule(course));
         const mobileTab = selectedMobileTab ?? firstScheduledDay(courses) ?? "all";
+        const gridLanes = courseGridLanes(scheduledCourses);
 
         function renderCourseList(courseList: readonly CatalogCourse[]) {
           return (
@@ -227,14 +229,22 @@ export function Timetable({ initialCourses }: TimetableProps) {
                   ))}
                   {scheduledCourses
                     .filter((course) => periodForScheduleStart(course.schedule.start) === period)
-                    .map((course) => (
-                      <div
-                        className="timetable-course"
+                    .map((course) => {
+                      const lane = gridLanes.get(course.id) ?? { index: 0, count: 1 };
+                      return (
+                        <div
+                        className={`timetable-course${lane.count > 1 ? " timetable-course--overlap" : ""}`}
                         key={course.id}
                         role="gridcell"
                         style={{
                           gridColumn: DAYS.indexOf(course.schedule.day) + 2,
                           gridRow: `${period + 1} / span ${course.schedule.duration}`,
+                          marginInlineStart: lane.count > 1
+                            ? `calc(${(lane.index * 100) / lane.count}% + 0.25rem)`
+                            : undefined,
+                          width: lane.count > 1
+                            ? `calc(${100 / lane.count}% - 0.5rem)`
+                            : undefined,
                         }}
                       >
                         <a href={`/courses/${course.id}`}>{course.name}</a>
@@ -250,11 +260,19 @@ export function Timetable({ initialCourses }: TimetableProps) {
                             onClick={() => void removeCourse(course.id)}
                             type="button"
                           >
-                            {removingCourseId === course.id ? "제거 중…" : "빼기"}
+                            {lane.count > 1 ? (
+                              <>
+                                <span aria-hidden="true">{removingCourseId === course.id ? "…" : "×"}</span>
+                                <span className="visually-hidden">
+                                  {removingCourseId === course.id ? "제거 중" : "빼기"}
+                                </span>
+                              </>
+                            ) : removingCourseId === course.id ? "제거 중…" : "빼기"}
                           </button>
                         </div>
-                      </div>
-                    ))}
+                        </div>
+                      );
+                    })}
                 </div>
               ))}
             </div>

@@ -3,6 +3,7 @@ import test from "node:test";
 import { renderToStaticMarkup } from "react-dom/server";
 
 import type { CatalogCourse } from "../features/catalog/catalog-data";
+import { courseGridLanes } from "../features/timetable/course-schedule";
 import { periodLabel, periodTime, Timetable } from "../features/timetable/timetable";
 
 const webCourse: CatalogCourse = {
@@ -37,6 +38,18 @@ test("교시는 09:00부터 50분 수업과 10분 휴식 주기로 매핑된다"
   assert.deepEqual(periodTime(2), { startsAt: "10:00", endsAt: "10:50" });
   assert.equal(periodLabel(13), "13교시 · 21:00–21:50 · 전공 실기");
   assert.equal(periodLabel(15), "15교시 · 23:00–23:50 · 전공 실기");
+});
+
+test("겹치는 수업은 같은 요일 안에서 서로 다른 그리드 lane을 사용한다", () => {
+  const lanes = courseGridLanes([webCourse, {
+    ...webCourse,
+    id: "overlap-course",
+    name: "인공지능",
+    schedule: { day: "월", start: 10, duration: 3 },
+  }]);
+
+  assert.deepEqual(lanes.get("web-course"), { index: 0, count: 2 });
+  assert.deepEqual(lanes.get("overlap-course"), { index: 1, count: 2 });
 });
 
 test("시간표는 15교시 그리드의 점유 과목을 키보드 링크와 제거 조작으로 렌더링한다", () => {
