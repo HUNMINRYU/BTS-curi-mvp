@@ -260,14 +260,10 @@ export function Timetable({ initialCourses }: TimetableProps) {
                             onClick={() => void removeCourse(course.id)}
                             type="button"
                           >
-                            {lane.count > 1 ? (
-                              <>
-                                <span aria-hidden="true">{removingCourseId === course.id ? "…" : "×"}</span>
-                                <span className="visually-hidden">
-                                  {removingCourseId === course.id ? "제거 중" : "빼기"}
-                                </span>
-                              </>
-                            ) : removingCourseId === course.id ? "제거 중…" : "빼기"}
+                            <span aria-hidden="true">{removingCourseId === course.id ? "…" : "×"}</span>
+                            <span className="visually-hidden">
+                              {removingCourseId === course.id ? "제거 중" : "빼기"}
+                            </span>
                           </button>
                         </div>
                         </div>

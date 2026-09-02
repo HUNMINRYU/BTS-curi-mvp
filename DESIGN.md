@@ -25,10 +25,11 @@ It describes what already ships; it does not introduce new tokens or redesigns.
 - The sticky topbar owns the first `4.5rem` of the viewport. The fixed chatbot shell starts below that boundary and ends above the viewport safe-area inset.
 - `.chatbot-panel` owns its vertical scroll. Long answers and citations scroll inside the panel; the document and topbar do not move to reveal them.
 - Launcher and panel remain at `z-index: 20`; geometry, not z-index escalation, prevents topbar overlap.
+- The fixed `.chatbot-shell` never captures background pointer input; only `.chatbot-panel` and `.chatbot-launcher` accept pointer events.
 
 ## Timetable course actions
 - Desktop timetable cards use one `.timetable-course-actions` footer containing metadata badges at the start and the remove button at the end.
-- The remove button keeps a minimum `2.75rem` target, visible focus ring, card surface, purple border/text, and bottom-right placement.
+- The remove button keeps a minimum `2.75rem` target, visible focus ring, card surface, purple border/text, and absolute bottom-right placement inside the card so short grid rows cannot push it outside.
 - Mobile and unscheduled lists keep their two-column content/action layout with the same button class and accessible course-specific label.
 
 ## Profile edit hierarchy

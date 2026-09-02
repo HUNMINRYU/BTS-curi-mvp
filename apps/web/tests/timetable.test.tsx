@@ -69,6 +69,10 @@ test("시간표는 15교시 그리드의 점유 과목을 키보드 링크와 �
   assert.match(html, /class="timetable-course-actions"/);
   assert.match(html, /class="timetable-remove-button"/);
   assert.match(html, /aria-label="웹콘텐츠개발 시간표에서 빼기"/);
+  assert.match(
+    html,
+    /class="timetable-course-actions"[\s\S]*?aria-label="웹콘텐츠개발 시간표에서 빼기"[\s\S]*?<span aria-hidden="true">×<\/span>/,
+  );
   for (const day of ["월", "화", "수", "목", "금", "토", "일"]) {
     assert.match(html, new RegExp(`<span class="timetable-day" role="columnheader">${day}</span>`));
   }
