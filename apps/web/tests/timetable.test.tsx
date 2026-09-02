@@ -33,6 +33,13 @@ const unscheduledCourse: CatalogCourse = {
   schedule: null,
 };
 
+const singlePeriodCourse: CatalogCourse = {
+  ...webCourse,
+  id: "single-period-course",
+  name: "컴퓨터프로그래밍",
+  schedule: { day: "수", start: 10, duration: 1 },
+};
+
 test("교시는 09:00부터 50분 수업과 10분 휴식 주기로 매핑된다", () => {
   assert.deepEqual(periodTime(1), { startsAt: "09:00", endsAt: "09:50" });
   assert.deepEqual(periodTime(2), { startsAt: "10:00", endsAt: "10:50" });
@@ -91,6 +98,14 @@ test("데스크톱 시간표 카드는 수업 시간과 학과 메타 배지를 
   assert.match(html, /timetable-course[\s\S]*?웹콘텐츠개발[\s\S]*?09:00–10:50 · 2교시/);
   assert.match(html, /timetable-course-badge[^>]*>컴퓨터공학과</);
   assert.match(html, /timetable-course[\s\S]*?건축설계실기[\s\S]*?21:00–22:50 · 2교시/);
+});
+
+test("1교시 과목은 짧은 행에 맞는 compact 카드로 렌더링한다", () => {
+  const html = renderToStaticMarkup(<Timetable initialCourses={[singlePeriodCourse]} />);
+
+  assert.match(html, /class="timetable-course timetable-course--compact"/);
+  assert.match(html, /컴퓨터프로그래밍/);
+  assert.match(html, /aria-label="컴퓨터프로그래밍 시간표에서 빼기"/);
 });
 
 test("모바일 시간표는 선택한 요일의 수업만 보여주고 전체 탭으로 전환할 수 있다", () => {

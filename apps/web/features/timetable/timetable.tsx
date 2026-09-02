@@ -231,9 +231,10 @@ export function Timetable({ initialCourses }: TimetableProps) {
                     .filter((course) => periodForScheduleStart(course.schedule.start) === period)
                     .map((course) => {
                       const lane = gridLanes.get(course.id) ?? { index: 0, count: 1 };
+                      const compact = course.schedule.duration === 1 || lane.count > 1;
                       return (
                         <div
-                        className={`timetable-course${lane.count > 1 ? " timetable-course--overlap" : ""}`}
+                        className={`timetable-course${compact ? " timetable-course--compact" : ""}${lane.count > 1 ? " timetable-course--overlap" : ""}`}
                         key={course.id}
                         role="gridcell"
                         style={{
