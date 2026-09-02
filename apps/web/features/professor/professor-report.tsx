@@ -37,7 +37,6 @@ export function ProfessorReport({ qaLogs, tipAggregate, classInsights }: Profess
             <p>학생 식별정보 없이 반복 질문과 구조화된 학습 팁만 확인합니다.</p>
           </div>
         </div>
-        <a className="text-link" href="/login">계정 전환</a>
       </header>
 
       <div className="professor-report-grid">

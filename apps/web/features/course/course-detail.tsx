@@ -2,7 +2,6 @@ import Link from "next/link";
 
 import type { CatalogCourse } from "@/features/catalog/catalog-data";
 import { scheduleLabel } from "@/features/timetable/course-schedule";
-import { SourceBadge } from "@/components/source-badge";
 import { QaPanel } from "@/features/qa/qa-panel";
 import { TipsPanel } from "@/features/tips/tips-panel";
 import type { TipAggregate } from "@/features/tips/tips";
@@ -31,7 +30,6 @@ function CourseHeader({ course, details }: { course: CatalogCourse; details?: Co
           <p>{course.summary}</p>
         </div>
         <div className="course-detail-actions">
-          <SourceBadge sourceKind={course.sourceKind} />
           <CourseSyllabusDialog course={course} {...(details ? { details } : {})} />
         </div>
       </div>
