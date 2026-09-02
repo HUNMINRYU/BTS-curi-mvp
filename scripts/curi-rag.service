@@ -7,7 +7,9 @@ Wants=network-online.target
 Type=simple
 User=ubuntu
 WorkingDirectory=/home/ubuntu/curi/shared/rag-runtime
-Environment=CURI_RAG_INDEX_PATH=/var/lib/curi/rag/index.faiss
+Environment=CURI_RAG_BUNDLE_PATH=/var/lib/curi/rag/state/current
+Environment=CURI_RAG_INDEX_PATH=/var/lib/curi/rag/state/current/index.faiss
+Environment=CURI_RAG_CHUNKS_PATH=/var/lib/curi/rag/state/current/chunks.jsonl
 ExecStart=/home/ubuntu/curi/shared/rag-venv/bin/python /home/ubuntu/curi/shared/rag-runtime/rag_sidecar.py
 Restart=on-failure
 RestartSec=5

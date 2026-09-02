@@ -50,6 +50,11 @@ jobs:
           chmod 600 ~/.ssh/curi.pem
           ssh-keyscan -H "$EC2_HOST" >> ~/.ssh/known_hosts
 
+      - name: Write immutable release manifest
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+        run: scripts/write-release-manifest.sh
+
       - name: Upload release
         id: release
         env:
@@ -111,7 +116,7 @@ jobs:
             exit 1
           fi
 
+          printf '%s\n' 'Manual cleanup candidates (no deletion performed):'
           find "$root/releases" -mindepth 1 -maxdepth 1 -type d \
-            -printf '%T@ %p\n' | sort -nr | tail -n +6 | cut -d' ' -f2- \
-            | xargs -r rm -rf
+            -printf '%T@ %p\n' | sort -nr | tail -n +6 | cut -d' ' -f2- || true
           REMOTE

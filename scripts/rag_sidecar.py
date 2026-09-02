@@ -10,6 +10,7 @@ import re
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from socketserver import TCPServer
 from typing import Sequence
 
 
@@ -124,9 +125,30 @@ class IndexStore:
             return self.records, self.vectors  # type: ignore[return-value]
 
 
+class LoopbackThreadingHTTPServer(ThreadingHTTPServer):
+    """Avoid a reverse-DNS lookup while binding the loopback-only sidecar."""
+
+    def server_bind(self) -> None:
+        TCPServer.server_bind(self)
+        host, port = self.server_address[:2]
+        self.server_name = str(host)
+        self.server_port = int(port)
+
+
 class RetrievalHandler(BaseHTTPRequestHandler):
     store: IndexStore
     bedrock: object
+
+    def do_GET(self) -> None:
+        if self.path != "/health":
+            self.send_error(404)
+            return
+        try:
+            self.store.snapshot()
+        except Exception:
+            self.respond(503, {"ok": False})
+            return
+        self.respond(200, {"ok": True})
 
     def do_POST(self) -> None:
         if self.path != "/retrieve":
@@ -162,8 +184,14 @@ class RetrievalHandler(BaseHTTPRequestHandler):
 def main() -> None:
     import boto3
 
-    index_path = Path(os.environ.get("CURI_RAG_INDEX_PATH", DEFAULT_INDEX_PATH))
-    chunks_path = Path(os.environ.get("CURI_RAG_CHUNKS_PATH", DEFAULT_CHUNKS_PATH))
+    bundle_path = os.environ.get("CURI_RAG_BUNDLE_PATH", "").strip()
+    if bundle_path:
+        resolved_bundle = Path(bundle_path).resolve()
+        index_path = resolved_bundle / "index.faiss"
+        chunks_path = resolved_bundle / "chunks.jsonl"
+    else:
+        index_path = Path(os.environ.get("CURI_RAG_INDEX_PATH", DEFAULT_INDEX_PATH))
+        chunks_path = Path(os.environ.get("CURI_RAG_CHUNKS_PATH", DEFAULT_CHUNKS_PATH))
     host = os.environ.get("CURI_RAG_HOST", "127.0.0.1")
     port = int(os.environ.get("CURI_RAG_PORT", "8788"))
     if host not in {"127.0.0.1", "::1", "localhost"}:
@@ -172,7 +200,7 @@ def main() -> None:
     RetrievalHandler.store = IndexStore(index_path, chunks_path)
     RetrievalHandler.bedrock = boto3.client("bedrock-runtime")
     RetrievalHandler.store.snapshot()
-    server = ThreadingHTTPServer((host, port), RetrievalHandler)
+    server = LoopbackThreadingHTTPServer((host, port), RetrievalHandler)
     print(f"CURI RAG sidecar listening on http://{host}:{port}", flush=True)
     server.serve_forever()
 
