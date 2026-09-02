@@ -821,13 +821,43 @@ h1 em { color: #b99cf0; font-style: normal; }
   background: var(--lavender);
   box-shadow: inset 3px 0 var(--purple);
 }
-.timetable-course a { min-height: 2.75rem; display: flex; align-items: center; padding-right: 3.1rem; color: var(--navy); font-size: 0.84rem; font-weight: 700; text-decoration: none; }
+.timetable-course a { min-height: 2.25rem; display: flex; align-items: flex-start; padding-right: 3rem; color: var(--navy); font-size: 0.84rem; font-weight: 700; line-height: 1.25; text-decoration: none; }
 .timetable-course-time { color: var(--muted); font-size: 0.72rem; line-height: 1.35; }
 .timetable-course-badges { display: flex; flex-wrap: wrap; gap: 0.3rem; }
 .timetable-course-badge { display: inline-flex; align-items: center; width: fit-content; padding: 0.2rem 0.5rem; border-radius: 999px; background: var(--card); color: var(--purple); font-size: 0.68rem; font-weight: 700; }
-.timetable-course-actions { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 0.35rem; margin-top: auto; padding-right: 3.1rem; }
+.timetable-course-actions { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 0.35rem; margin-top: auto; }
 .timetable-course-actions .timetable-course-badges { min-width: 0; }
-.timetable-course .timetable-remove-button { position: absolute; right: 0.55rem; bottom: 0.55rem; min-width: 2.75rem; min-height: 2.75rem; flex: 0 0 auto; padding: 0.4rem 0.55rem; border: 1px solid var(--purple-line); border-radius: 0.65rem; background: var(--card); color: var(--purple); font-size: 1.1rem; font-weight: 700; line-height: 1; cursor: pointer; }
+.timetable-course .timetable-remove-button {
+  position: absolute;
+  top: 0.3rem;
+  right: 0.3rem;
+  display: grid;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  place-items: center;
+  padding: 0.375rem;
+  border: 0;
+  background: transparent;
+  color: var(--purple);
+  cursor: pointer;
+}
+.timetable-course .timetable-remove-button > span[aria-hidden="true"] {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border: 1px solid var(--purple-line);
+  border-radius: 0.55rem;
+  background: var(--card);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1;
+  transition: transform 150ms ease, border-color 150ms ease, background 150ms ease;
+}
+.timetable-course .timetable-remove-button:hover > span[aria-hidden="true"] { border-color: var(--purple); background: var(--lavender); }
+.timetable-course .timetable-remove-button:active > span[aria-hidden="true"] { transform: scale(0.94); }
+.timetable-course .timetable-remove-button:focus-visible { outline: 3px solid var(--purple); outline-offset: 1px; border-radius: 0.7rem; }
+.timetable-course .timetable-remove-button:disabled { cursor: wait; opacity: 0.55; }
 .timetable-course--compact { grid-template-rows: minmax(0, 1fr); align-content: stretch; overflow: hidden; }
 .timetable-course--compact > a { min-height: 0; align-items: center; font-size: 0.72rem; line-height: 1.25; overflow-wrap: anywhere; }
 .timetable-course--compact .timetable-course-time,
@@ -838,7 +868,7 @@ h1 em { color: #b99cf0; font-style: normal; }
 .timetable-course--overlap .timetable-course-time { display: none; }
 .timetable-course--overlap .timetable-course-actions { justify-content: flex-end; margin-top: 0.25rem; }
 .timetable-course--overlap .timetable-course-badges { display: none; }
-.timetable-course--overlap .timetable-remove-button { margin-top: auto; }
+.timetable-course--overlap .timetable-remove-button { top: auto; bottom: 0.3rem; margin-top: auto; }
 .timetable-mobile-list { display: none; }
 .timetable-unscheduled { margin-top: 1rem; }
 .timetable-unscheduled h3 { margin: 0 0 0.65rem; color: var(--purple); font-size: 0.85rem; }

@@ -29,7 +29,9 @@ It describes what already ships; it does not introduce new tokens or redesigns.
 
 ## Timetable course actions
 - Desktop timetable cards use one `.timetable-course-actions` footer containing metadata badges at the start and the remove button at the end.
-- The remove button keeps a minimum `2.75rem` target, visible focus ring, card surface, purple border/text, and absolute bottom-right placement inside the card so short grid rows cannot push it outside.
+- The remove button keeps a minimum `2.75rem` hit target while its visible tile is `2rem`; this preserves touch accessibility without dominating the course card.
+- Standard and one-period cards place the visible remove tile at the top-right. Narrow overlap cards reserve the bottom-right area so the course title can use the full lane width.
+- Remove controls use the card/purple token pair, a visible focus ring, and 150ms hover/press feedback without changing layout bounds.
 - Mobile and unscheduled lists keep their two-column content/action layout with the same button class and accessible course-specific label.
 
 ## Profile edit hierarchy
