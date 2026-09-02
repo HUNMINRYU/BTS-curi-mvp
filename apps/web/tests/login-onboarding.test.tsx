@@ -8,7 +8,7 @@ import {
   OnboardingPageContent,
   getOnboardingRedirect,
 } from "../app/onboarding/page";
-import Home from "../app/page";
+import { HomeContent } from "../app/page";
 import {
   OnboardingWizard,
   onboardingSubmissionError,
@@ -40,14 +40,16 @@ test("login page exposes only labeled credential fields and a signup path", () =
 
 test("signup and main page make account creation the visible starting path", () => {
   const signupMarkup = renderToStaticMarkup(<SignupPage />);
-  const homeMarkup = renderToStaticMarkup(<Home />);
+  const publicHomeMarkup = renderToStaticMarkup(<HomeContent authenticated={false} />);
+  const authenticatedHomeMarkup = renderToStaticMarkup(<HomeContent authenticated />);
 
   assert.match(signupMarkup, /<main[^>]*aria-labelledby="signup-title"/);
   assert.match(signupMarkup, /<label[^>]*for="signup-username"[^>]*>아이디<\/label>/);
   assert.match(signupMarkup, /<label[^>]*for="signup-name"[^>]*>이름<\/label>/);
   assert.match(signupMarkup, /<label[^>]*for="signup-password"[^>]*>비밀번호<\/label>/);
   assert.match(signupMarkup, /href="\/login"[^>]*>로그인<\/a>/);
-  assert.match(homeMarkup, /href="\/signup"[^>]*>회원가입하고 시작하기<\/a>/);
+  assert.match(publicHomeMarkup, /href="\/signup"[^>]*>회원가입하고 시작하기<\/a>/);
+  assert.doesNotMatch(authenticatedHomeMarkup, /href="\/signup"[^>]*>회원가입하고 시작하기<\/a>/);
 });
 
 test("onboarding page server rendering provides an accessible seven-step sequence", () => {

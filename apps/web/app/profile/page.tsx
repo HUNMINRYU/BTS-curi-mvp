@@ -23,27 +23,31 @@ export default async function ProfilePage() {
   if (!profile) redirect("/onboarding");
 
   return (
-    <main className="account-page onboarding-page" aria-labelledby="profile-title">
-      <section className="account-intro">
+    <main className="profile-page" aria-labelledby="profile-title">
+      <header className="profile-page-header">
         <p className="eyebrow">UPDATE MY COURSE PROFILE</p>
         <h1 id="profile-title">달라진 나를,<br /><em>추천에 반영해요.</em></h1>
         <p className="account-slogan">전공, 관심분야와 학습 목표를 고치면 다음 추천부터 바로 반영됩니다.</p>
         <CuriReward compact />
-      </section>
-      <OnboardingWizard
-        initialProfile={{
-          major: profile.major,
-          interest: profile.interest,
-          goal: profile.goal,
-          career: profile.career,
-          style: profile.style,
-          hours: profile.hours,
-          avoid: profile.avoid,
-        }}
-        mode="edit"
-      />
-      <StudentRankingPanel ranking={database.getStudentRanking(session.user.id)} />
-      <AbilityDashboard />
+      </header>
+      <div className="profile-page-layout">
+        <OnboardingWizard
+          initialProfile={{
+            major: profile.major,
+            interest: profile.interest,
+            goal: profile.goal,
+            career: profile.career,
+            style: profile.style,
+            hours: profile.hours,
+            avoid: profile.avoid,
+          }}
+          mode="edit"
+        />
+        <aside aria-label="학습 현황" className="profile-page-insights">
+          <StudentRankingPanel ranking={database.getStudentRanking(session.user.id)} />
+          <AbilityDashboard />
+        </aside>
+      </div>
     </main>
   );
 }

@@ -186,6 +186,7 @@ export function Timetable({ initialCourses }: TimetableProps) {
                   </div>
                   <button
                     aria-label={`${course.name} 시간표에서 빼기`}
+                    className="timetable-remove-button"
                     disabled={removingCourseId === course.id}
                     onClick={() => void removeCourse(course.id)}
                     type="button"
@@ -238,17 +239,20 @@ export function Timetable({ initialCourses }: TimetableProps) {
                       >
                         <a href={`/courses/${course.id}`}>{course.name}</a>
                         <span className="timetable-course-time">{courseTimeLabel(course.schedule)}</span>
-                        <span className="timetable-course-badges">
-                          <span className="timetable-course-badge">{course.department}</span>
-                        </span>
-                        <button
-                          aria-label={`${course.name} 시간표에서 빼기`}
-                          disabled={removingCourseId === course.id}
-                          onClick={() => void removeCourse(course.id)}
-                          type="button"
-                        >
-                          {removingCourseId === course.id ? "제거 중…" : "빼기"}
-                        </button>
+                        <div className="timetable-course-actions">
+                          <span className="timetable-course-badges">
+                            <span className="timetable-course-badge">{course.department}</span>
+                          </span>
+                          <button
+                            aria-label={`${course.name} 시간표에서 빼기`}
+                            className="timetable-remove-button"
+                            disabled={removingCourseId === course.id}
+                            onClick={() => void removeCourse(course.id)}
+                            type="button"
+                          >
+                            {removingCourseId === course.id ? "제거 중…" : "빼기"}
+                          </button>
+                        </div>
                       </div>
                     ))}
                 </div>

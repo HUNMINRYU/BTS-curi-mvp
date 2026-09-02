@@ -335,8 +335,10 @@ h1 em { color: #b99cf0; font-style: normal; }
 .chatbot-shell {
   display: grid;
   justify-items: end;
+  align-content: end;
   gap: 0.75rem;
   position: fixed;
+  top: calc(4.5rem + max(0.75rem, env(safe-area-inset-top)));
   right: max(1.5rem, env(safe-area-inset-right));
   bottom: max(1.5rem, env(safe-area-inset-bottom));
   z-index: 20;
@@ -366,8 +368,10 @@ h1 em { color: #b99cf0; font-style: normal; }
 .chatbot-launcher strong { font-size: 0.86rem; }
 .chatbot-panel {
   width: min(27rem, calc(100vw - 2rem));
-  max-height: min(42rem, calc(100vh - 7.5rem));
+  max-height: min(42rem, calc(100% - 4.85rem));
   overflow: auto;
+  overscroll-behavior: contain;
+  scroll-padding-block: 1rem;
   padding: 1.2rem;
   border: 1px solid var(--purple-line);
   border-radius: 1.25rem;
@@ -813,7 +817,9 @@ h1 em { color: #b99cf0; font-style: normal; }
 .timetable-course-time { color: var(--muted); font-size: 0.72rem; line-height: 1.35; }
 .timetable-course-badges { display: flex; flex-wrap: wrap; gap: 0.3rem; }
 .timetable-course-badge { display: inline-flex; align-items: center; width: fit-content; padding: 0.2rem 0.5rem; border-radius: 999px; background: var(--card); color: var(--purple); font-size: 0.68rem; font-weight: 700; }
-.timetable-course button { min-width: 2.75rem; min-height: 2.75rem; justify-self: start; padding: 0.4rem; border: 0; background: transparent; color: var(--purple); font-size: 0.75rem; font-weight: 700; cursor: pointer; }
+.timetable-course-actions { display: flex; align-items: flex-end; justify-content: space-between; gap: 0.35rem; margin-top: auto; }
+.timetable-course-actions .timetable-course-badges { min-width: 0; }
+.timetable-course .timetable-remove-button { min-width: 2.75rem; min-height: 2.75rem; flex: 0 0 auto; padding: 0.4rem 0.55rem; border: 1px solid var(--purple-line); border-radius: 0.65rem; background: var(--card); color: var(--purple); font-size: 0.75rem; font-weight: 700; cursor: pointer; }
 .timetable-mobile-list { display: none; }
 .timetable-unscheduled { margin-top: 1rem; }
 .timetable-unscheduled h3 { margin: 0 0 0.65rem; color: var(--purple); font-size: 0.85rem; }
@@ -961,6 +967,29 @@ h1 em { color: #b99cf0; font-style: normal; }
 .ability-bars span { display: block; min-width: 2rem; border-radius: 999px; padding: 0.22rem 0.4rem; background: var(--purple-line); color: var(--navy); font-size: 0.68rem; font-weight: 700; text-align: right; }
 .ability-bars span:last-child { background: var(--purple); color: #fff; }
 
+.profile-page { min-height: 100vh; padding-bottom: 5rem; background: var(--lavender); }
+.profile-page-header {
+  padding: 3rem max(1.25rem, calc((100vw - 76rem) / 2)) 4.5rem;
+  color: #fff;
+  background: var(--navy);
+}
+.profile-page-header h1 { max-width: 12ch; font-size: clamp(2.8rem, 5vw, 4.8rem); }
+.profile-page-header .account-slogan { max-width: 36rem; }
+.profile-page-layout {
+  width: min(100% - 2.5rem, 76rem);
+  margin: -2rem auto 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(18rem, 0.85fr);
+  gap: 1.25rem;
+  align-items: start;
+  position: relative;
+  z-index: 2;
+}
+.profile-page .onboarding-card,
+.profile-page .ranking-panel,
+.profile-page .ability-dashboard { width: 100%; margin: 0; }
+.profile-page-insights { display: grid; gap: 1.25rem; align-content: start; }
+
 .tips-panel { align-items: start; }
 .tips-summary,
 .tips-panel form { min-width: 0; }
@@ -1036,6 +1065,8 @@ h1 em { color: #b99cf0; font-style: normal; }
   .professor-report-grid { grid-template-columns: 1fr; width: min(100% - 2rem, 76rem); }
   .personal-goal { width: calc(100% - 2rem); }
   .curi-reward { min-width: 0; width: 100%; }
+  .profile-page-layout { grid-template-columns: 1fr; }
+  .profile-page-insights { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 767px) {
   .course-detail-header,
@@ -1049,6 +1080,9 @@ h1 em { color: #b99cf0; font-style: normal; }
   .professor-report-grid { width: calc(100% - 1.5rem); }
   .tip-averages { grid-template-columns: 1fr; }
   .tips-panel { padding-inline: 1rem; }
+  .profile-page-header { padding: 2rem 1rem 3.5rem; }
+  .profile-page-layout { width: calc(100% - 1.5rem); margin-top: -1.5rem; }
+  .profile-page-insights { grid-template-columns: 1fr; }
 }
 
 .course-detail-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 0.65rem; }

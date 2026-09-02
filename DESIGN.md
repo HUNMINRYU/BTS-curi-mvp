@@ -21,6 +21,21 @@ It describes what already ships; it does not introduce new tokens or redesigns.
 - `.topbar-logout` is a ghost button (`1px rgba(255,255,255,0.2)` border, transparent background), hover border `var(--purple-bright)`, disabled state `opacity: 0.55`.
 - Errors surface in `.topbar-status`, an `aria-live="polite"` paragraph under the topbar.
 
+## Chatbot overlay
+- The sticky topbar owns the first `4.5rem` of the viewport. The fixed chatbot shell starts below that boundary and ends above the viewport safe-area inset.
+- `.chatbot-panel` owns its vertical scroll. Long answers and citations scroll inside the panel; the document and topbar do not move to reveal them.
+- Launcher and panel remain at `z-index: 20`; geometry, not z-index escalation, prevents topbar overlap.
+
+## Timetable course actions
+- Desktop timetable cards use one `.timetable-course-actions` footer containing metadata badges at the start and the remove button at the end.
+- The remove button keeps a minimum `2.75rem` target, visible focus ring, card surface, purple border/text, and bottom-right placement.
+- Mobile and unscheduled lists keep their two-column content/action layout with the same button class and accessible course-specific label.
+
+## Profile edit hierarchy
+- Profile editing is the primary task: dark page header, one editor card, and one secondary insights rail.
+- Ranking and ability simulation are grouped in `.profile-page-insights`, never peers of the editor in the page grid.
+- At tablet widths the insight cards may share two columns; at mobile widths every region stacks into one column.
+
 ## Palette
 Reuse existing CSS variables only: `--navy`, `--card`, `--purple`, `--purple-bright`, `--lavender`, plus the existing translucent overlays `rgba(255,255,255,0.16)` / `rgba(149,106,232,0.18)`. No new hex values.
 

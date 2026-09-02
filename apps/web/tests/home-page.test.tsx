@@ -2,10 +2,10 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { renderToStaticMarkup } from "react-dom/server";
 
-import Home from "../app/page";
+import { HomeContent } from "../app/page";
 
 test("홈은 모바일에서 단어 단위 제목과 간결한 진행 상태를 제공한다", () => {
-  const html = renderToStaticMarkup(<Home />);
+  const html = renderToStaticMarkup(<HomeContent authenticated={false} />);
 
   assert.match(
     html,
